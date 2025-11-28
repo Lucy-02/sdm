@@ -2,9 +2,10 @@
 
 ## 📍 디렉토리 목적
 
-`context/` 디렉토리는 작업의 현재 상태와 히스토리를 관리하는 중추입니다.
+`context/` 디렉토리는 작업의 현재 상태와 문서 인덱싱을 관리하는 중추입니다.
 - **current.md**: 실시간 작업 상태 추적
-- **history/**: 모든 작업 이력과 대화 로그 보관
+- **index.md**: Global numbering 관리 및 모든 문서 인덱싱
+- **dialog/**: 대화 로그 보관
 
 ## 📄 current.md - 작업 연속성의 핵심
 
@@ -62,16 +63,15 @@
 2. [그 다음 작업]
 ```
 
-## 📂 history/ 디렉토리
+## 📂 dialog/ 디렉토리 - 대화 로그
 
-### dialog/ - 대화 로그
 - **형식**: `YYYYMMDD_NNN_dialog.md`
   - YYYYMMDD: 날짜
   - NNN: 당일 순번 (001부터)
 - **내용**: 사용자와 Claude 간 대화 원문
 - **편집 금지**: 원본 그대로 보존
 
-### index.md - Global Numbering 기록
+## 📑 index.md - Global Numbering 및 문서 인덱싱
 
 ```markdown
 # Global Numbering Index
@@ -80,9 +80,9 @@
 
 | 번호 | 파일명 | 위치 | 생성일시 | 설명 |
 |------|--------|------|----------|------|
-| 001 | 001_initial_setup_plan.md | plan/ | 2024-11-28 10:00 | 초기 설정 계획 |
-| 002 | 002_auth_todo.md | todo/ | 2024-11-28 10:30 | 인증 할일 |
-| 003 | 003_db_structure.md | structure/ | 2024-11-28 11:00 | DB 구조 문서 |
+| 001 | 001_initial_setup_plan.md | docs/plan/ | 2024-11-28 10:00 | 초기 설정 계획 |
+| 002 | 002_auth_todo.md | docs/todo/ | 2024-11-28 10:30 | 인증 할일 |
+| 003 | 003_db_structure.md | docs/structure/ | 2024-11-28 11:00 | DB 구조 문서 |
 
 ## 다음 번호: 004
 

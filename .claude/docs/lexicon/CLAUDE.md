@@ -15,7 +15,7 @@
 
 ### 📌 번호 할당 필수 확인
 **새 lexicon 문서 생성 전 반드시:**
-1. `.claude/context/history/index.md` 열기
+1. `.claude/context/index.md` 열기
 2. "다음 번호" 확인
 3. 해당 번호로 문서 생성
 4. index.md에 즉시 기록
@@ -171,7 +171,7 @@ graph LR
 
 ### 문서 작성 후
 - [ ] Global numbering 할당
-- [ ] history/index.md 업데이트
+- [ ] context/index.md 업데이트
 - [ ] 알파벳/가나다 순 정렬
 - [ ] 색인 업데이트
 

@@ -27,27 +27,29 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
 ├── CLAUDE.md                    # 🔴 메인 가이드 (최우선 확인)
 ├── context/
 │   ├── current.md              # 🔴 실시간 작업 상태
-│   └── history/
-│       ├── dialog/             # 대화 로그
-│       └── index.md            # Global numbering 인덱스
-├── plan/                        # 계획 문서
-├── todo/                        # 할일 문서
-├── review/                      # 리뷰 문서
-├── structure/                   # 코드 구조 문서화
-├── DKB/                         # 도메인 지식
-├── lexicon/                     # 용어 사전
-└── dev_action/                  # 개발자 액션
+│   ├── index.md                # Global numbering 인덱스
+│   └── dialog/                 # 대화 로그
+├── docs/                        # 모든 문서 디렉토리
+│   ├── plan/                   # 계획 문서
+│   ├── todo/                   # 할일 문서
+│   ├── review/                 # 리뷰 문서
+│   ├── structure/              # 코드 구조 문서화
+│   ├── DKB/                    # 도메인 지식
+│   ├── lexicon/                # 용어 사전
+│   └── dev_action/             # 개발자 액션
+├── scripts/                     # 자동화 스크립트
+└── templates/                   # 문서 템플릿
 ```
 
 ## 🔢 Global Numbering 체계
 
 - **생성 순서 기반**: 001, 002, 003... (디렉토리 무관)
-- **중앙 관리**: `.claude/context/history/index.md`
+- **중앙 관리**: `.claude/context/index.md`
 - **제외 파일**: CLAUDE.md, current.md, dialog/*.md
 
 ### 📌 문서 생성 시 필수 확인
 **새 numbered 문서 생성 전 반드시:**
-1. `.claude/context/history/index.md` 열기
+1. `.claude/context/index.md` 열기
 2. "다음 번호" 확인
 3. 해당 번호로 문서 생성
 4. index.md에 즉시 기록
@@ -64,15 +66,15 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
    - 파일 변경 내역
 
 2. **구조 문서** - 파일 변경 시 즉시
-   - `.claude/structure/` 내 관련 문서
+   - `.claude/docs/structure/` 내 관련 문서
    - 파일 생성/수정/삭제 반영
 
 3. **지식 문서** - 발견 즉시
-   - `.claude/DKB/` - 새 패턴이나 해결책
-   - `.claude/lexicon/` - 새 용어
+   - `.claude/docs/DKB/` - 새 패턴이나 해결책
+   - `.claude/docs/lexicon/` - 새 용어
 
 4. **차단 문서** - 발견 즉시
-   - `.claude/dev_action/` - 외부 도움 필요 시
+   - `.claude/docs/dev_action/` - 외부 도움 필요 시
 
 ### ⏰ 동기화 타이밍 = "즉시"
 
@@ -91,16 +93,48 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
 ## 📚 디렉토리별 가이드
 
 각 디렉토리의 상세 가이드는 해당 CLAUDE.md 참조:
+- **[문서 작성 및 링킹](.claude/docs/CLAUDE.md)** - 🔗 문서 간 연결 규칙
 - [컨텍스트 관리](.claude/context/CLAUDE.md)
-- [계획 작성](.claude/plan/CLAUDE.md)
-- [할일 관리](.claude/todo/CLAUDE.md)
-- [리뷰 작성](.claude/review/CLAUDE.md)
-- [구조 문서화](.claude/structure/CLAUDE.md)
-- [지식 베이스](.claude/DKB/CLAUDE.md)
-- [용어 사전](.claude/lexicon/CLAUDE.md)
-- [개발자 액션](.claude/dev_action/CLAUDE.md)
+- [계획 작성](.claude/docs/plan/CLAUDE.md)
+- [할일 관리](.claude/docs/todo/CLAUDE.md)
+- [리뷰 작성](.claude/docs/review/CLAUDE.md)
+- [구조 문서화](.claude/docs/structure/CLAUDE.md)
+- [지식 베이스](.claude/docs/DKB/CLAUDE.md)
+- [용어 사전](.claude/docs/lexicon/CLAUDE.md)
+- [개발자 액션](.claude/docs/dev_action/CLAUDE.md)
 
-## 🛠️ 필수 도구
+## 🛠️ 유용한 도구들
+
+### 자동화 스크립트 (`.claude/scripts/`)
+
+작업 효율성을 위한 스크립트들:
+
+- **`claude-new-doc.sh`** - 번호 자동 할당으로 새 문서 생성
+  ```bash
+  ./.claude/scripts/claude-new-doc.sh plan "authentication_system"
+  # 자동으로 다음 번호 할당, 템플릿 적용, index.md 업데이트
+  ```
+- **`claude-check-links.sh`** - 모든 마크다운 링크 검증
+  ```bash
+  ./.claude/scripts/claude-check-links.sh
+  # 깨진 링크 찾기, 상호 참조 확인
+  ```
+- **`claude-sync-status.sh`** - 문서 동기화 상태 확인
+  ```bash
+  ./.claude/scripts/claude-sync-status.sh
+  # current.md와 실제 파일 상태 비교
+  ```
+
+### 문서 템플릿 (`.claude/templates/`)
+
+일관성 있는 문서 작성을 위한 템플릿:
+- `plan_template.md` - 3가지 옵션 계획서
+- `todo_template.md` - 단계별 작업 분해
+- `review_template.md` - 완료 검토
+- `current_template.md` - 작업 상태 추적
+- 기타 9개 템플릿 제공
+
+### Claude 도구
 
 - `mcp__serena__*`: 코드 탐색 및 수정
 - `mcp__context7__*`: 문서 조회
