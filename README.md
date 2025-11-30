@@ -149,6 +149,11 @@ cat .claude/context/index.md
 # 🔄 동기화 상태 확인
 ./.claude/scripts/claude-sync-status.sh
 # → current.md vs 실제 파일 상태 비교
+
+# 💬 대화 내용 저장 (수동)
+./.claude/scripts/claude-save-dialog.sh "작업 설명"
+# → dialog 디렉토리에 대화 로그 생성
+# → 편집기 자동 열기 (EDITOR 설정 시)
 ```
 
 ### 빠른 명령어
