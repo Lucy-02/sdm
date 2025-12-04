@@ -1,0 +1,364 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User & Auth
+// ============================================
+
+enum UserRole {
+  CUSTOMER  // 일반 사용자
+  VENDOR    // 업체 관리자
+  ADMIN     // 시스템 관리자
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  phone         String?
+  password      String?   // 해싱된 비밀번호 (OAuth 시 null)
+  role          UserRole  @default(CUSTOMER)
+
+  // OAuth
+  provider      String?   // google, kakao, naver
+  providerId    String?
+
+  emailVerified Boolean   @default(false)
+  isActive      Boolean   @default(true)
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  simulationResults SimulationResult[]
+  ownedVendors      Vendor[]           @relation("VendorOwner")
+  reviews           Review[]
+  bookings          Booking[]
+  favorites         Favorite[]
+
+  @@index([email])
+  @@index([provider, providerId])
+}
+
+// ============================================
+// Simulation (AI 결혼 사진)
+// ============================================
+
+enum SimulationStatus {
+  PENDING     // 대기
+  UPLOADING   // 업로드 중
+  PROCESSING  // AI 처리 중
+  COMPLETED   // 완료
+  FAILED      // 실패
+}
+
+model SimulationResult {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 입력 이미지
+  groomImageUrl   String
+  brideImageUrl   String
+
+  // 출력 이미지
+  outputImageUrl  String?
+
+  // 처리 상태
+  status          SimulationStatus  @default(PENDING)
+  concept         String?           // "classic", "modern", "outdoor", "vintage"
+
+  // 메타데이터 (처리 시간, AI 모델 버전 등)
+  metadata        Json?             // { processingTime: 45000, modelVersion: "v2.1", ... }
+
+  // 에러 정보
+  errorMessage    String?
+
+  createdAt       DateTime          @default(now())
+  completedAt     DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============================================
+// Vendor Categories (확장 가능)
+// ============================================
+
+model VendorCategory {
+  id              String    @id @default(cuid())
+  slug            String    @unique       // "studio", "makeup", "dress", "venue", "car"
+  name            String                  // "스튜디오", "메이크업"
+  description     String?
+  icon            String?                 // 아이콘 URL 또는 emoji
+
+  displayOrder    Int       @default(0)   // 표시 순서
+  isActive        Boolean   @default(true)
+
+  // 메타데이터 스키마 정의 (JSON Schema)
+  schemaVersion   String    @default("1.0")
+  requiredFields  Json?     // { "portfolio": true, "certifications": false, ... }
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  vendors         Vendor[]
+  tags            Tag[]
+
+  @@index([slug])
+  @@index([isActive, displayOrder])
+}
+
+// ============================================
+// Vendors (업체)
+// ============================================
+
+model Vendor {
+  id              String          @id @default(cuid())
+
+  // 카테고리
+  categoryId      String
+  category        VendorCategory  @relation(fields: [categoryId], references: [id])
+
+  // 소유자
+  ownerId         String?
+  owner           User?           @relation("VendorOwner", fields: [ownerId], references: [id])
+
+  // 기본 정보
+  name            String
+  slug            String          @unique       // URL용 (unique)
+  description     String?         @db.Text
+
+  // 연락처
+  phone           String?
+  email           String?
+  website         String?
+
+  // 위치
+  location        String                        // "서울특별시 강남구 테헤란로 123"
+  lat             Float?                        // 위도
+  lng             Float?                        // 경도
+
+  // 가격
+  priceRange      String?                       // "100만원~200만원" (표시용)
+  priceMin        Int?                          // 100 (필터링용, 단위: 만원)
+  priceMax        Int?                          // 200
+
+  // 영업 정보
+  businessHours   Json?           // { "mon": "09:00-18:00", "tue": "09:00-18:00", ... }
+
+  // 업체별 고유 속성 (확장 가능)
+  metadata        Json?           // 예시:
+                                  // 스튜디오: { "studioSize": "200평", "equipments": ["4K카메라", ...] }
+                                  // 메이크업: { "certifications": ["국가자격증"], "specialties": ["한복"] }
+                                  // 예식장: { "capacity": 300, "parkingSpots": 100, "hasChapel": true }
+
+  // 통계
+  rating          Float?          @default(0)   // 평균 평점 (1-5)
+  reviewCount     Int             @default(0)
+  bookingCount    Int             @default(0)
+  favoriteCount   Int             @default(0)
+  viewCount       Int             @default(0)
+
+  // 상태
+  isVerified      Boolean         @default(false)  // 인증 업체
+  isActive        Boolean         @default(true)
+  isPremium       Boolean         @default(false)  // 프리미엄 업체 (광고)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  images          VendorImage[]
+  tags            VendorTag[]
+  reviews         Review[]
+  bookings        Booking[]
+  favorites       Favorite[]
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isActive, isPremium])
+  @@index([rating])
+  @@index([location]) // 지역 검색용
+  @@index([priceMin, priceMax])
+}
+
+// ============================================
+// Vendor Images
+// ============================================
+
+enum VendorImageType {
+  PORTFOLIO   // 포트폴리오
+  THUMBNAIL   // 썸네일
+  LOGO        // 로고
+  INTERIOR    // 인테리어
+  MENU        // 메뉴/가격표
+}
+
+model VendorImage {
+  id            String           @id @default(cuid())
+  vendorId      String
+  vendor        Vendor           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  url           String
+  type          VendorImageType  @default(PORTFOLIO)
+  displayOrder  Int              @default(0)
+  altText       String?
+
+  createdAt     DateTime         @default(now())
+
+  @@index([vendorId, type])
+  @@index([vendorId, displayOrder])
+}
+
+// ============================================
+// Tags (검색 및 필터링)
+// ============================================
+
+model Tag {
+  id            String          @id @default(cuid())
+  name          String                              // "야외촬영", "한복", "채플"
+  slug          String          @unique             // "outdoor", "hanbok", "chapel"
+
+  categoryId    String?                             // 특정 카테고리에 속한 태그
+  category      VendorCategory? @relation(fields: [categoryId], references: [id])
+
+  usageCount    Int             @default(0)         // 사용된 횟수
+
+  createdAt     DateTime        @default(now())
+
+  // Relations
+  vendors       VendorTag[]
+
+  @@index([slug])
+  @@index([categoryId])
+}
+
+model VendorTag {
+  id        String   @id @default(cuid())
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([vendorId, tagId])
+  @@index([vendorId])
+  @@index([tagId])
+}
+
+// ============================================
+// Reviews
+// ============================================
+
+model Review {
+  id            String    @id @default(cuid())
+  vendorId      String
+  vendor        Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookingId     String?
+  booking       Booking?  @relation(fields: [bookingId], references: [id])
+
+  rating        Int                 // 1-5
+  title         String?
+  content       String    @db.Text
+  images        Json?               // ["url1", "url2", ...]
+
+  isVerified    Boolean   @default(false)  // 실제 이용 확인
+
+  // 업체 답변
+  response      String?   @db.Text
+  respondedAt   DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([vendorId])
+  @@index([userId])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// ============================================
+// Bookings (예약/문의)
+// ============================================
+
+enum BookingStatus {
+  PENDING     // 문의 접수
+  CONFIRMED   // 예약 확정
+  COMPLETED   // 이용 완료
+  CANCELLED   // 취소
+  REJECTED    // 거절
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  vendorId        String
+  vendor          Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status          BookingStatus @default(PENDING)
+
+  // 결혼식 정보
+  eventDate       DateTime?               // 결혼식 날짜
+  guestCount      Int?                    // 하객 수 (예식장용)
+  budget          Int?                    // 예산 (만원)
+
+  // 문의 내용
+  message         String        @db.Text
+  vendorResponse  String?       @db.Text
+
+  // 업체별 추가 정보 (확장 가능)
+  metadata        Json?         // 예시:
+                                // 스튜디오: { "shootingDate": "2025-05-01", "location": "야외" }
+                                // 예식장: { "meal": "한식", "ceremony": "양식" }
+
+  createdAt       DateTime      @default(now())
+  confirmedAt     DateTime?
+  completedAt     DateTime?
+
+  // Relations
+  reviews         Review[]
+
+  @@index([vendorId])
+  @@index([userId])
+  @@index([status])
+  @@index([eventDate])
+}
+
+// ============================================
+// Favorites (찜하기)
+// ============================================
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  vendorId  String
+  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, vendorId])
+  @@index([userId])
+  @@index([vendorId])
+}
