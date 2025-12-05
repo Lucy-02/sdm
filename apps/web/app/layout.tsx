@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'SDM - 결혼 준비 플랫폼',
@@ -15,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className='font-sans' lang="ko">
-      <body className={inter.className}>{children}</body>
+    <html lang="ko">
+      <body className="font-sans">{children}</body>
     </html>
   );
 }

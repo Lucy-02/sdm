@@ -1,12 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -14,19 +11,13 @@ datasource db {
 // User & Auth
 // ============================================
 
-enum UserRole {
-  CUSTOMER  // 일반 사용자
-  VENDOR    // 업체 관리자
-  ADMIN     // 시스템 관리자
-}
-
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
   name          String?
   phone         String?
   password      String?   // 해싱된 비밀번호 (OAuth 시 null)
-  role          UserRole  @default(CUSTOMER)
+  role          String    @default("CUSTOMER")  // "CUSTOMER" | "VENDOR" | "ADMIN"
 
   // OAuth
   provider      String?   // google, kakao, naver
@@ -39,14 +30,15 @@ model User {
   updatedAt     DateTime  @updatedAt
   lastLoginAt   DateTime?
 
-  // Relations
+  // Favorite: 찜한 업체 ID 배열
+  favoriteVendorIds String[] @db.ObjectId
+
+  // Relations (1:N은 유지)
   simulationResults SimulationResult[]
   ownedVendors      Vendor[]           @relation("VendorOwner")
   reviews           Review[]
   bookings          Booking[]
-  favorites         Favorite[]
 
-  @@index([email])
   @@index([provider, providerId])
 }
 
@@ -54,18 +46,10 @@ model User {
 // Simulation (AI 결혼 사진)
 // ============================================
 
-enum SimulationStatus {
-  PENDING     // 대기
-  UPLOADING   // 업로드 중
-  PROCESSING  // AI 처리 중
-  COMPLETED   // 완료
-  FAILED      // 실패
-}
-
 model SimulationResult {
-  id              String            @id @default(cuid())
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 입력 이미지
   groomImageUrl   String
@@ -75,16 +59,16 @@ model SimulationResult {
   outputImageUrl  String?
 
   // 처리 상태
-  status          SimulationStatus  @default(PENDING)
-  concept         String?           // "classic", "modern", "outdoor", "vintage"
+  status          String    @default("PENDING")  // "PENDING" | "UPLOADING" | "PROCESSING" | "COMPLETED" | "FAILED"
+  concept         String?   // "classic", "modern", "outdoor", "vintage"
 
   // 메타데이터 (처리 시간, AI 모델 버전 등)
-  metadata        Json?             // { processingTime: 45000, modelVersion: "v2.1", ... }
+  metadata        Json?     // { processingTime: 45000, modelVersion: "v2.1", ... }
 
   // 에러 정보
   errorMessage    String?
 
-  createdAt       DateTime          @default(now())
+  createdAt       DateTime  @default(now())
   completedAt     DateTime?
 
   @@index([userId])
@@ -97,7 +81,7 @@ model SimulationResult {
 // ============================================
 
 model VendorCategory {
-  id              String    @id @default(cuid())
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
   slug            String    @unique       // "studio", "makeup", "dress", "venue", "car"
   name            String                  // "스튜디오", "메이크업"
   description     String?
@@ -106,7 +90,7 @@ model VendorCategory {
   displayOrder    Int       @default(0)   // 표시 순서
   isActive        Boolean   @default(true)
 
-  // 메타데이터 스키마 정의 (JSON Schema)
+  // 메타데이터 스키마 정의
   schemaVersion   String    @default("1.0")
   requiredFields  Json?     // { "portfolio": true, "certifications": false, ... }
 
@@ -117,8 +101,26 @@ model VendorCategory {
   vendors         Vendor[]
   tags            Tag[]
 
-  @@index([slug])
   @@index([isActive, displayOrder])
+}
+
+// ============================================
+// Tags (검색 및 필터링)
+// ============================================
+
+model Tag {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String                              // "야외촬영", "한복", "채플"
+  slug          String    @unique                   // "outdoor", "hanbok", "chapel"
+
+  categoryId    String?   @db.ObjectId              // 특정 카테고리에 속한 태그
+  category      VendorCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  usageCount    Int       @default(0)               // 사용된 횟수
+
+  createdAt     DateTime  @default(now())
+
+  @@index([categoryId])
 }
 
 // ============================================
@@ -126,20 +128,20 @@ model VendorCategory {
 // ============================================
 
 model Vendor {
-  id              String          @id @default(cuid())
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
 
   // 카테고리
-  categoryId      String
-  category        VendorCategory  @relation(fields: [categoryId], references: [id])
+  categoryId      String          @db.ObjectId
+  category        VendorCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   // 소유자
-  ownerId         String?
-  owner           User?           @relation("VendorOwner", fields: [ownerId], references: [id])
+  ownerId         String?         @db.ObjectId
+  owner           User?           @relation("VendorOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
   // 기본 정보
   name            String
   slug            String          @unique       // URL용 (unique)
-  description     String?         @db.Text
+  description     String?
 
   // 연락처
   phone           String?
@@ -159,6 +161,12 @@ model Vendor {
   // 영업 정보
   businessHours   Json?           // { "mon": "09:00-18:00", "tue": "09:00-18:00", ... }
 
+  // 태그: 임베디드 방식 (검색 효율 위해)
+  tags            Json?           // [{ id, name, slug }, ...]
+
+  // 이미지: 임베디드 방식
+  images          Json?           // [{ url, type, displayOrder, altText }, ...]
+
   // 업체별 고유 속성 (확장 가능)
   metadata        Json?           // 예시:
                                   // 스튜디오: { "studioSize": "200평", "equipments": ["4K카메라", ...] }
@@ -166,7 +174,7 @@ model Vendor {
                                   // 예식장: { "capacity": 300, "parkingSpots": 100, "hasChapel": true }
 
   // 통계
-  rating          Float?          @default(0)   // 평균 평점 (1-5)
+  rating          Float           @default(0)   // 평균 평점 (1-5)
   reviewCount     Int             @default(0)
   bookingCount    Int             @default(0)
   favoriteCount   Int             @default(0)
@@ -180,84 +188,15 @@ model Vendor {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  // Relations
-  images          VendorImage[]
-  tags            VendorTag[]
+  // Relations (1:N은 유지)
   reviews         Review[]
   bookings        Booking[]
-  favorites       Favorite[]
 
   @@index([categoryId])
-  @@index([slug])
   @@index([isActive, isPremium])
   @@index([rating])
-  @@index([location]) // 지역 검색용
+  @@index([location])
   @@index([priceMin, priceMax])
-}
-
-// ============================================
-// Vendor Images
-// ============================================
-
-enum VendorImageType {
-  PORTFOLIO   // 포트폴리오
-  THUMBNAIL   // 썸네일
-  LOGO        // 로고
-  INTERIOR    // 인테리어
-  MENU        // 메뉴/가격표
-}
-
-model VendorImage {
-  id            String           @id @default(cuid())
-  vendorId      String
-  vendor        Vendor           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-
-  url           String
-  type          VendorImageType  @default(PORTFOLIO)
-  displayOrder  Int              @default(0)
-  altText       String?
-
-  createdAt     DateTime         @default(now())
-
-  @@index([vendorId, type])
-  @@index([vendorId, displayOrder])
-}
-
-// ============================================
-// Tags (검색 및 필터링)
-// ============================================
-
-model Tag {
-  id            String          @id @default(cuid())
-  name          String                              // "야외촬영", "한복", "채플"
-  slug          String          @unique             // "outdoor", "hanbok", "chapel"
-
-  categoryId    String?                             // 특정 카테고리에 속한 태그
-  category      VendorCategory? @relation(fields: [categoryId], references: [id])
-
-  usageCount    Int             @default(0)         // 사용된 횟수
-
-  createdAt     DateTime        @default(now())
-
-  // Relations
-  vendors       VendorTag[]
-
-  @@index([slug])
-  @@index([categoryId])
-}
-
-model VendorTag {
-  id        String   @id @default(cuid())
-  vendorId  String
-  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  tagId     String
-  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([vendorId, tagId])
-  @@index([vendorId])
-  @@index([tagId])
 }
 
 // ============================================
@@ -265,25 +204,25 @@ model VendorTag {
 // ============================================
 
 model Review {
-  id            String    @id @default(cuid())
-  vendorId      String
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  vendorId      String    @db.ObjectId
   vendor        Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
-  userId        String
+  userId        String    @db.ObjectId
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  bookingId     String?
-  booking       Booking?  @relation(fields: [bookingId], references: [id])
+  bookingId     String?   @db.ObjectId
+  booking       Booking?  @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   rating        Int                 // 1-5
   title         String?
-  content       String    @db.Text
+  content       String
   images        Json?               // ["url1", "url2", ...]
 
   isVerified    Boolean   @default(false)  // 실제 이용 확인
 
   // 업체 답변
-  response      String?   @db.Text
+  response      String?
   respondedAt   DateTime?
 
   createdAt     DateTime  @default(now())
@@ -299,23 +238,15 @@ model Review {
 // Bookings (예약/문의)
 // ============================================
 
-enum BookingStatus {
-  PENDING     // 문의 접수
-  CONFIRMED   // 예약 확정
-  COMPLETED   // 이용 완료
-  CANCELLED   // 취소
-  REJECTED    // 거절
-}
-
 model Booking {
-  id              String        @id @default(cuid())
-  vendorId        String
-  vendor          Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  vendorId        String    @db.ObjectId
+  vendor          Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
-  userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String    @db.ObjectId
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  status          BookingStatus @default(PENDING)
+  status          String    @default("PENDING")  // "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "REJECTED"
 
   // 결혼식 정보
   eventDate       DateTime?               // 결혼식 날짜
@@ -323,8 +254,8 @@ model Booking {
   budget          Int?                    // 예산 (만원)
 
   // 문의 내용
-  message         String        @db.Text
-  vendorResponse  String?       @db.Text
+  message         String
+  vendorResponse  String?
 
   // 업체별 추가 정보 (확장 가능)
   metadata        Json?         // 예시:
@@ -342,23 +273,4 @@ model Booking {
   @@index([userId])
   @@index([status])
   @@index([eventDate])
-}
-
-// ============================================
-// Favorites (찜하기)
-// ============================================
-
-model Favorite {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  vendorId  String
-  vendor    Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, vendorId])
-  @@index([userId])
-  @@index([vendorId])
 }
