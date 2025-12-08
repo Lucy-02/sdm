@@ -1,11 +1,11 @@
 # Current Work Status
 
 ## 📍 현재 위치
-**파일**: apps/web/app/vendors/page.tsx
-**작업**: Vendors 페이지 목업 UI 구현 완료
+**파일**: apps/web/app/login/page.tsx, apps/web/app/register/page.tsx
+**작업**: 로그인/회원가입 페이지 UI 디자인 완료
 
 ## 🎯 현재 작업
-Vendors 페이지 목업 UI 구현 (검색, 필터링, 정렬 기능 포함)
+로그인 및 회원가입 페이지 프론트엔드 UI 구현 (백엔드 연결 없이)
 
 ### 완료된 작업
 1. ✅ Monorepo 구조 생성 (Turborepo + pnpm workspace)
@@ -42,7 +42,7 @@ Vendors 페이지 목업 UI 구현 (검색, 필터링, 정렬 기능 포함)
 32. ✅ **MongoDB Replica Set 초기화**
 33. ✅ **MongoDB seed 스크립트 작성 및 데이터 삽입 (20 vendors, 5 categories, 15 tags)**
 34. ✅ **백엔드 Vendor 서비스 JSON 필드 처리 로직 수정**
-35. ✅ **Vendors 페이지 목업 UI 구현 및 개선** ⭐ NEW
+35. ✅ **Vendors 페이지 목업 UI 구현 및 개선**
     - 검색 input (업체 이름 검색, 향상된 디자인)
     - 카테고리 선택 (전체/스튜디오/드레스/메이크업/예식장/한복) + 이모지 아이콘
     - 정렬 옵션 (인기순/가격순/별점순) + 아이콘
@@ -54,6 +54,21 @@ Vendors 페이지 목업 UI 구현 (검색, 필터링, 정렬 기능 포함)
     - 향상된 애니메이션 및 호버 효과
     - 검색 결과 없을 시 리셋 버튼
     - 상세보기 버튼 추가
+36. ✅ **Header & Footer 레이아웃 컴포넌트 구현**
+    - Header: 로고, 검색바, 네비게이션 드롭다운, 찜/로그인
+    - Footer: 4컬럼 (브랜드/카테고리/서비스/뉴스레터)
+    - 반응형 모바일 메뉴 지원
+37. ✅ **ImageCarousel 리빌드**
+    - 드래그 기능 추가 (draggable prop)
+    - children 요소 지원 개선
+    - 자동 스크롤 + 드래그 공존
+    - 호버 시 일시정지
+    - 스냅 애니메이션 (가장 가까운 아이템으로)
+38. ✅ **로그인/회원가입 페이지 UI 디자인** ⭐ NEW
+    - 로그인 페이지: 이메일/비밀번호 입력, 소셜 로그인 (Google, 카카오, 네이버)
+    - 회원가입 페이지: 이름/이메일/전화번호/비밀번호, 약관 동의, 비밀번호 유효성 검사
+    - 프로젝트 컬러 테마 적용 (#C58D8D, #B36B6B)
+    - 반응형 디자인, 그라데이션 배경
 
 ### 🔄 MongoDB 마이그레이션 상세
 - ✅ Prisma provider: `postgresql` → `mongodb`
@@ -202,19 +217,23 @@ apps/api/prisma/migrations/20251205015830_init/  ✅ NEW (DB 마이그레이션)
 ```
 
 ## ⏰ 마지막 업데이트
-2025-12-05 (PostgreSQL → MongoDB 완전 마이그레이션 완료)
+2025-12-08 (ImageCarousel 드래그 기능 추가)
 
 ## 📝 최근 변경 사항
 ### 새로 생성된 파일
-- (없음 - 기존 파일 수정만 진행)
+- `apps/web/components/layout/Header.tsx` - 전역 헤더 컴포넌트
+- `apps/web/components/layout/Footer.tsx` - 전역 푸터 컴포넌트
 
 ### 수정된 파일
-- `apps/web/app/page.tsx` - 스튜디오/드레스 Carousel에 실제 업체 데이터 연동
-  - useEffect로 스튜디오(studio), 드레스(dress) 카테고리 업체 10개씩 로드
-  - ImageCarousel children에 업체 카드 컴포넌트 전달
-  - 업체 이미지, 이름, 위치, 평점 표시
-  - 호버 시 정보 표시 (gradient overlay)
-  - 클릭 시 해당 카테고리 필터된 /vendors 페이지로 이동
+- `apps/web/components/ui/ImageCarousel.tsx` - 드래그 기능 추가
+  - `draggable` prop: 드래그 활성화 여부 (기본 true)
+  - `autoScroll` prop: 자동 스크롤 활성화 여부 (기본 true)
+  - `pauseOnDrag` prop: 드래그 시 자동 스크롤 일시정지 (기본 true)
+  - children 개수 자동 감지
+  - 스냅 애니메이션 (spring)
+  - 호버 시 자동 스크롤 일시정지
+- `apps/web/app/layout.tsx` - Header/Footer 적용
+- `apps/web/app/page.tsx` - main → div 변경
 
 ## 🖥️ 서버 상태
 - ⏸️ 백엔드: http://localhost:3001 (중지됨)

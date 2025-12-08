@@ -53,11 +53,12 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col items-center justify-center p-24 gap-y-4">
+    <div className="flex flex-col items-center justify-center p-20 gap-y-4">
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">TITLE</h1>
       </div>
-      <motion.div
+      {/* hwakjanghyeong Search Bar */}
+      {/* <motion.div
         onHoverStart={() => {
           setExpand(true);
         }}
@@ -191,7 +192,7 @@ export default function Home() {
             </ImageCarousel>
           )}
         </motion.div>
-      </motion.div>
+      </motion.div> */}
 
       <div className="w-[1200px] h-[280px] flex gap-6 p-8">
         {/* 스튜디오 */}
@@ -317,7 +318,7 @@ export default function Home() {
           ].map(result => (
             <div
               key={result.id}
-              className="flex-shrink-0 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-200 overflow-hidden group cursor-pointer hover:scale-[102%]"
+              className="flex-shrink-0 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer hover:scale-[102%]"
               style={{ width: '280px', height: '220px' }}
             >
               <div className={`w-full h-full bg-gradient-to-br ${result.gradient} p-4 flex flex-col justify-between relative`}>
@@ -365,6 +366,6 @@ export default function Home() {
 
         <ArrowBigRightDash className="p-0.5" color="#FFFFFF" />
       </Link>
-    </main>
+    </div>
   );
 }
