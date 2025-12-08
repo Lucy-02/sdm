@@ -13,7 +13,7 @@ export default function Step2() {
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center py-8">
+    <div className="w-full min-h-[calc(100vh-64px)] flex items-center justify-center py-8">
       <div className="flex flex-col w-[600px] min-h-[860px] justify-between">
         {/* Title */}
         <motion.p
@@ -90,7 +90,7 @@ export default function Step2() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="flex border-2 border-neutral-400 p-4 rounded-lg border-opacity-60 hover:border-opacity-100 transition-all bg-white shadow-sm"
+                className="flex border-2 border-neutral-400 px-4 py-3 rounded-lg border-opacity-60 hover:border-opacity-100 transition-all bg-white shadow-sm"
               >
                 <input
                   onChange={e => {
@@ -128,9 +128,9 @@ export default function Step2() {
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.7, ease: [0, 0.8, 0.2, 1] }}
-                        className="flex flex-col gap-y-2 p-3 rounded-lg bg-neutral-50 border border-neutral-200 flex-1 h-[150px]"
+                        className="flex flex-col gap-y-1.5 p-3 rounded-lg bg-neutral-50 border border-neutral-200 flex-1 h-[150px]"
                       >
-                        <div className="flex items-center bg-[#B36B6B] text-white px-3 py-2 rounded">
+                        <div className="flex items-center bg-[#B36B6B] text-white px-2 py-1.5 rounded">
                           <p className="text-sm font-semibold tracking-tight">스튜디오 정보</p>
                         </div>
                         <div className="flex flex-col gap-y-1 px-2 flex-1 justify-center">
@@ -148,19 +148,18 @@ export default function Step2() {
                       initial={{ opacity: 0, y: -40 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, delay: 0.2, ease: [0, 0.8, 0.2, 1] }}
-                      className="flex flex-col w-full mt-4 p-4 rounded-lg bg-neutral-50 gap-y-3 shadow-sm border border-neutral-200"
+                      className="flex flex-col w-full mt-4 p-4 rounded-lg bg-neutral-50 gap-y-2 shadow-sm border border-neutral-200"
                     >
-                      <div className="flex items-center bg-[#B36B6B] text-white px-3 py-2 rounded">
+                      <div className="flex items-center bg-[#B36B6B] text-white px-2 py-1.5 rounded">
                         <p className="text-sm font-semibold tracking-tight">샘플 작품</p>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div className="w-[260px] h-[130px] bg-gradient-to-br from-neutral-200 to-neutral-300 rounded-lg shadow-sm"></div>
+                        <div className="w-[260px] h-[120px] bg-gradient-to-br from-neutral-200 to-neutral-300 rounded-lg shadow-sm"></div>
                       </div>
                       <ImageCarousel
                         itemHeight={120}
                         delay={1}
                         repeatDelay={2}
-                        returnToStart={true}
                         className="rounded-lg"
                       />
                     </motion.div>
@@ -168,10 +167,9 @@ export default function Step2() {
                 </div>
               ) : (
                 <ImageCarousel
-                  itemHeight={150}
+                  itemHeight={120}
                   delay={2}
                   repeatDelay={2}
-                  returnToStart={true}
                 />
               )}
             </div>
@@ -198,7 +196,7 @@ export default function Step2() {
             duration: 0.8,
             delay: 0.9,
           }}
-          className="flex gap-x-2 justify-center w-full pt-4"
+          className="flex gap-x-2 justify-center w-full mb-6"
         >
           <button
             onClick={prevStep}

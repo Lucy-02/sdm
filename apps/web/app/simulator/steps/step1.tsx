@@ -10,7 +10,7 @@ export default function Step1() {
   const [agreed, setAgreed] = useState(false);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center py-8">
+    <div className="w-full min-h-[calc(100vh-64px)] flex items-center justify-center py-8">
       <div className="flex flex-col w-[600px] min-h-[860px]">
         <motion.p
           initial={{ x: -100, opacity: 0 }}
@@ -44,7 +44,7 @@ export default function Step1() {
             duration: 0.8,
             delay: 0.6,
           }}
-          className="flex flex-col mt-12 flex-1"
+          className="flex flex-col mt-12"
         >
           {/* 서비스 특징 카드 */}
           <div className="space-y-4">
@@ -126,7 +126,7 @@ export default function Step1() {
             duration: 0.8,
             delay: 1.5,
           }}
-          className="flex gap-x-2 justify-center w-full mt-auto pt-4"
+          className="flex gap-x-2 justify-center w-full mt-auto pb-6"
         >
           <button
             onClick={nextStep}

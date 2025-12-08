@@ -97,7 +97,7 @@ export default function Step3() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center py-8">
+    <div className="w-full min-h-[calc(100vh-64px)] flex items-center justify-center py-8">
       <div className="flex flex-col items-center w-[600px] min-h-[860px]">
         <motion.p
           initial={{ x: -100, opacity: 0 }}
@@ -241,7 +241,7 @@ export default function Step3() {
               duration: 1,
               delay: 1.2,
             }}
-            className="flex gap-x-2 justify-center w-full pt-4"
+            className="flex gap-x-2 justify-center w-full mb-6"
           >
             <button
               onClick={prevStep}

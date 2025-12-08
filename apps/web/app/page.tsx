@@ -322,7 +322,7 @@ export default function Home() {
               style={{ width: '280px', height: '220px' }}
             >
               <div className={`w-full h-full bg-gradient-to-br ${result.gradient} p-4 flex flex-col justify-between relative`}>
-                <div className="absolute top-2 right-2 bg-white/90 rounded-full px-3 py-1 text-xs font-semibold text-neutral-700 shadow-sm">
+                <div className="absolute top-2 right-2 bg-white/90 rounded-lg px-3 py-1 text-xs font-semibold text-neutral-700 shadow-sm">
                   {result.budget}
                 </div>
                 <div className="flex-1 flex items-center justify-center">

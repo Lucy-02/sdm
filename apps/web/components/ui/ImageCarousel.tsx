@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useMotionValue, useAnimation, PanInfo } from 'motion/react';
-import { ReactNode, useRef, useState, useEffect, Children } from 'react';
+import { ReactNode, useRef, useState, useEffect, Children, useCallback } from 'react';
 
 interface ImageCarouselProps {
   /** 아이템 개수 (children 없을 때 사용) */
@@ -14,10 +14,10 @@ interface ImageCarouselProps {
   displayCount?: number;
   /** 아이템 간 간격 (px) */
   gap?: number;
-  /** 자동 스크롤 지연 시간 (초) */
-  delay?: number;
-  /** 반복 지연 시간 (초) */
-  repeatDelay?: number;
+  /** 이동 시간 (초) */
+  moveDuration?: number;
+  /** 대기 시간 (초) */
+  waitDuration?: number;
   /** 처음으로 돌아갈지 여부 */
   returnToStart?: boolean;
   /** 자식 요소 */
@@ -36,14 +36,16 @@ interface ImageCarouselProps {
   dragSensitivity?: number;
 }
 
+// TODO: hover in -> out tl ekdma vhwltusdmfh dlehdgksms qjrm tnwjd vlfdy.
+
 export default function ImageCarousel({
   itemCount = 10,
   itemWidth = 220,
   itemHeight = 150,
   displayCount = 4,
   gap = 8,
-  delay = 0,
-  repeatDelay = 2,
+  moveDuration = 2,
+  waitDuration = 4,
   returnToStart = false,
   children,
   className = '',
@@ -67,63 +69,77 @@ export default function ImageCarousel({
   // 이동 거리 계산
   const itemStep = itemWidth + gap;
   const maxDrag = -(itemStep * (actualItemCount - displayCount));
-  const duration = actualItemCount * 3;
+  const maxIndex = actualItemCount - displayCount;
 
-  // 현재 위치에서 키프레임 생성 (현재 인덱스부터 시작)
-  const generateKeyframesFromIndex = (startIndex: number) => {
-    const keyframes: number[] = [];
-    const maxIndex = actualItemCount - displayCount;
+  // 타이머 ref
+  const animationRef = useRef<{ timeoutId?: NodeJS.Timeout; isCancelled: boolean }>({
+    isCancelled: false,
+  });
 
-    // 현재 위치부터 끝까지
-    for (let i = startIndex; i <= maxIndex; i++) {
-      keyframes.push(-itemStep * i);
-      if (i < maxIndex) {
-        keyframes.push(-itemStep * i); // 정지 효과
+  // 자동 스크롤 사이클: 3초 이동 → 5초 대기 → 반복
+  const runAutoScrollCycle = async () => {
+    if (!autoScroll || isPaused || isDragging || animationRef.current.isCancelled) return;
+
+    const currentIndex = currentIndexRef.current;
+    let nextIndex = currentIndex + 1;
+
+    // 끝에 도달하면 처음으로
+    if (nextIndex > maxIndex) {
+      if (returnToStart) {
+        nextIndex = 0;
+      } else {
+        // 처음으로 돌아가지 않으면 처음부터 다시 시작
+        currentIndexRef.current = 0;
+        nextIndex = 1;
+        x.set(0);
       }
     }
 
-    // returnToStart가 true면 처음으로 돌아간 후 다시 현재 위치까지
-    if (returnToStart) {
-      keyframes.push(0);
-      for (let i = 0; i < startIndex; i++) {
-        keyframes.push(-itemStep * i);
-        keyframes.push(-itemStep * i);
-      }
-    }
+    const targetX = -nextIndex * itemStep;
 
-    return keyframes;
-  };
-
-  // 자동 스크롤 애니메이션 시작 (현재 위치에서)
-  const startAutoScroll = () => {
-    if (!autoScroll || isPaused || isDragging) return;
-
-    const keyframes = generateKeyframesFromIndex(currentIndexRef.current);
-    if (keyframes.length === 0) return;
-
-    // 남은 아이템 수에 비례한 duration 계산
-    const remainingItems = actualItemCount - displayCount - currentIndexRef.current;
-    const adjustedDuration = Math.max(remainingItems * 3, 3);
-
-    controls.start({
-      x: keyframes,
+    // 3초 동안 이동
+    await controls.start({
+      x: targetX,
       transition: {
-        duration: adjustedDuration,
-        delay,
-        ease: [0, 0.7, 0.2, 1],
-        repeat: Infinity,
-        repeatDelay,
-        repeatType: 'loop',
+        duration: moveDuration,
+        ease: [0.25, 0.1, 0.25, 1],
       },
     });
+
+    if (animationRef.current.isCancelled) return;
+
+    currentIndexRef.current = nextIndex;
+
+    // 5초 대기 후 다음 사이클
+    animationRef.current.timeoutId = setTimeout(() => {
+      if (!animationRef.current.isCancelled) {
+        runAutoScrollCycle();
+      }
+    }, waitDuration * 1000);
   };
+
+  // 자동 스크롤 시작
+  const startAutoScroll = () => {
+    if (!autoScroll || isPaused || isDragging) return;
+    animationRef.current.isCancelled = false;
+    runAutoScrollCycle();
+  };
+
+  // 자동 스크롤 정지
+  const stopAutoScrollAnimation = useCallback(() => {
+    animationRef.current.isCancelled = true;
+    if (animationRef.current.timeoutId) {
+      clearTimeout(animationRef.current.timeoutId);
+    }
+    controls.stop();
+  }, [controls]);
 
   // 자동 스크롤 정지 및 현재 위치 저장
   const stopAutoScroll = () => {
     const currentX = x.get();
     const currentIndex = Math.round(-currentX / itemStep);
     currentIndexRef.current = Math.max(0, Math.min(currentIndex, actualItemCount - displayCount));
-    controls.stop();
+    stopAutoScrollAnimation();
   };
 
   // 드래그 시작
@@ -171,11 +187,23 @@ export default function ImageCarousel({
 
   // 자동 스크롤 시작/정지 관리
   useEffect(() => {
+    // 항상 먼저 기존 애니메이션 정지
+    stopAutoScrollAnimation();
+
     if (autoScroll && !isDragging && !isPaused) {
-      startAutoScroll();
+      // 약간의 지연 후 시작하여 이전 애니메이션이 완전히 정리되도록 함
+      const timeoutId = setTimeout(() => {
+        startAutoScroll();
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        stopAutoScrollAnimation();
+      };
     }
+
     return () => {
-      controls.stop();
+      stopAutoScrollAnimation();
     };
   }, [autoScroll, isDragging, isPaused, actualItemCount]);
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import {
   Search,
@@ -13,6 +13,8 @@ import {
   DollarSign,
   Sparkles,
   SearchX,
+  ChevronDown,
+  X,
 } from 'lucide-react';
 
 // 목업 데이터
@@ -193,8 +195,49 @@ type SortOption = 'popularity' | 'price' | 'rating';
 
 export default function VendorsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get('category');
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    categoryFromUrl ? [categoryFromUrl] : []
+  );
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
+  // URL 파라미터가 변경되면 카테고리 상태 업데이트
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategories([categoryFromUrl]);
+    }
+  }, [categoryFromUrl]);
+
+  const toggleCategory = (slug: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(slug)) {
+        return prev.filter(c => c !== slug);
+      }
+      return [...prev, slug];
+    });
+  };
+
+  const clearCategories = () => {
+    setSelectedCategories([]);
+  };
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const [sortBy, setSortBy] = useState<SortOption>('popularity');
   const [likedVendors, setLikedVendors] = useState<Set<string>>(
     new Set(MOCK_VENDORS.filter(v => v.liked).map(v => v.id))
@@ -203,7 +246,7 @@ export default function VendorsPage() {
   // 필터링 및 정렬
   const filteredAndSortedVendors = MOCK_VENDORS.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || vendor.category === selectedCategory;
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(vendor.category);
     return matchesSearch && matchesCategory;
   }).sort((a, b) => {
     switch (sortBy) {
@@ -260,25 +303,59 @@ export default function VendorsPage() {
                 placeholder="업체 이름으로 검색..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 border-2 border-neutral-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C58D8D] focus:border-transparent transition-all shadow-sm hover:shadow-md"
+                className="w-full pl-12 pr-4 py-3.5 border-2 border-neutral-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C58D8D] focus:border-transparent transition-all shadow-sm"
               />
             </div>
 
-            {/* 카테고리 선택 */}
-            <div className="flex gap-2">
-              {MOCK_CATEGORIES.map(category => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.slug)}
-                  className={`px-5 py-3.5 rounded-2xl font-semibold whitespace-nowrap transition-all duration-200 ${
-                    selectedCategory === category.slug
-                      ? 'bg-[#C58D8D] text-white'
-                      : 'bg-white text-neutral-600 border-2 border-neutral-200 hover:border-[#C58D8D] hover:text-[#C58D8D]'
-                  }`}
-                >
-                  {category.name}
-                </button>
-              ))}
+            {/* 카테고리 선택 - 드롭다운 */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                className="flex items-center gap-2 px-5 py-3.5 bg-white border-2 border-neutral-200 rounded-2xl font-semibold text-neutral-600 hover:border-[#C58D8D] transition-all shadow-sm min-w-[160px]"
+              >
+                <span>
+                  {selectedCategories.length === 0
+                    ? '카테고리 선택'
+                    : selectedCategories.length === 1
+                      ? MOCK_CATEGORIES.find(c => c.slug === selectedCategories[0])?.name || '선택됨'
+                      : `${selectedCategories.length}개 선택됨`}
+                </span>
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {isCategoryDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-neutral-200 rounded-xl shadow-lg z-30 py-2">
+                  {/* 전체 선택 해제 버튼 */}
+                  {selectedCategories.length > 0 && (
+                    <button
+                      onClick={() => {
+                        clearCategories();
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-neutral-500 hover:bg-neutral-50 flex items-center gap-2"
+                    >
+                      <X size={16} />
+                      선택 초기화
+                    </button>
+                  )}
+                  {MOCK_CATEGORIES.filter(c => c.slug !== 'all').map(category => (
+                    <label
+                      key={category.id}
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-neutral-50 cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category.slug)}
+                        onChange={() => toggleCategory(category.slug)}
+                        className="w-4 h-4 accent-[#C58D8D] rounded"
+                      />
+                      <span className="text-sm font-medium text-neutral-700">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -474,7 +551,7 @@ export default function VendorsPage() {
             <button
               onClick={() => {
                 setSearchQuery('');
-                setSelectedCategory('all');
+                clearCategories();
               }}
               className="px-6 py-3 bg-gradient-to-r from-[#C58D8D] to-[#B36B6B] text-white font-semibold rounded-xl hover:shadow-lg transition-all"
             >
