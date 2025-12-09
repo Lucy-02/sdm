@@ -139,7 +139,34 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
 - `mcp__serena__*`: 코드 탐색 및 수정
 - `mcp__context7__*`: 문서 조회
 - `mcp__sequential-thinking`: 복잡한 의사결정
+- `mcp__time__*`: 현재 시간 조회
 - `TodoWrite`: 작업 추적
+
+## 🕐 Time MCP 사용 규칙
+
+**모든 시간/날짜 관련 작업 시 반드시 `mcp__time__get_current_time` 도구를 사용하세요.**
+
+### 필수 사용 상황
+- 문서에 timestamp 기록 시
+- current.md 업데이트 시 (마지막 업데이트 시간)
+- dialog 로그 생성 시
+- index.md 문서 등록 시
+- review 문서 작성 시
+- 세션 시작/종료 시간 기록 시
+
+### 사용 예시
+```
+# 현재 시간 조회
+mcp__time__get_current_time 도구 호출
+
+# 결과를 문서에 반영
+마지막 업데이트: 2025-11-28 14:35:22 KST
+```
+
+### ⚠️ 금지 사항
+- ❌ 시스템 시간 추측하지 않기
+- ❌ 이전 대화에서 본 시간 재사용하지 않기
+- ❌ "현재 시간" 없이 timestamp 작성하지 않기
 
 ---
 

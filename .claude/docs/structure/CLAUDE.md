@@ -196,3 +196,15 @@ graph LR
 - 임시 파일은 제외
 - node_modules 등 제외
 - 중요도에 따라 상세도 조절
+
+## 🕐 Time MCP 필수 사용
+
+**⚠️ Structure 문서의 모든 timestamp는 `mcp__time__get_current_time` 도구로 조회하세요.**
+
+### 적용 위치
+- 최종수정 날짜
+- 변경 이력 날짜
+
+### ❌ 금지
+- 시간 추측 금지
+- 이전 시간 재사용 금지
