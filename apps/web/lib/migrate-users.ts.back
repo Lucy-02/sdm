@@ -1,0 +1,133 @@
+/**
+ * MongoDB 컬렉션 마이그레이션 스크립트
+ *
+ * 'user' (소문자) 컬렉션의 데이터를 'User' (대문자) 컬렉션으로 이동합니다.
+ * 또한 'session' -> 'Session', 'account' -> 'Account' 컬렉션도 마이그레이션합니다.
+ *
+ * 실행 방법:
+ * npx tsx apps/web/lib/migrate-users.ts
+ */
+
+import { MongoClient } from "mongodb";
+
+const DATABASE_URL = process.env.DATABASE_URL || "mongodb://localhost:27017/sdm";
+
+interface MigrationResult {
+  collection: string;
+  migrated: number;
+  skipped: number;
+  errors: string[];
+}
+
+async function migrateCollection(
+  db: ReturnType<MongoClient["db"]>,
+  sourceCollection: string,
+  targetCollection: string
+): Promise<MigrationResult> {
+  const result: MigrationResult = {
+    collection: `${sourceCollection} -> ${targetCollection}`,
+    migrated: 0,
+    skipped: 0,
+    errors: [],
+  };
+
+  // 소스 컬렉션 존재 확인
+  const collections = await db.listCollections({ name: sourceCollection }).toArray();
+  if (collections.length === 0) {
+    console.log(`  ⏭️  '${sourceCollection}' 컬렉션이 존재하지 않음 - 건너뜀`);
+    return result;
+  }
+
+  const source = db.collection(sourceCollection);
+  const target = db.collection(targetCollection);
+
+  // 소스 컬렉션의 모든 문서 가져오기
+  const documents = await source.find({}).toArray();
+  console.log(`  📊 '${sourceCollection}'에서 ${documents.length}개 문서 발견`);
+
+  for (const doc of documents) {
+    try {
+      // 타겟에 동일한 _id가 있는지 확인
+      const existing = await target.findOne({ _id: doc._id });
+
+      if (existing) {
+        console.log(`    ⏭️  ID ${doc._id} 이미 존재 - 건너뜀`);
+        result.skipped++;
+        continue;
+      }
+
+      // 타겟 컬렉션에 삽입
+      await target.insertOne(doc);
+      console.log(`    ✅ ID ${doc._id} 마이그레이션 완료`);
+      result.migrated++;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log(`    ❌ ID ${doc._id} 에러: ${errorMessage}`);
+      result.errors.push(`${doc._id}: ${errorMessage}`);
+    }
+  }
+
+  return result;
+}
+
+async function main() {
+  console.log("🚀 MongoDB 컬렉션 마이그레이션 시작\n");
+  console.log(`📍 데이터베이스: ${DATABASE_URL}\n`);
+
+  const client = new MongoClient(DATABASE_URL);
+
+  try {
+    await client.connect();
+    console.log("✅ MongoDB 연결 성공\n");
+
+    const db = client.db();
+
+    // 마이그레이션할 컬렉션 목록 (소문자 -> 대문자)
+    const migrations = [
+      { source: "user", target: "User" },
+      { source: "session", target: "Session" },
+      { source: "account", target: "Account" },
+      { source: "verification", target: "Verification" },
+    ];
+
+    const results: MigrationResult[] = [];
+
+    for (const { source, target } of migrations) {
+      console.log(`\n📦 ${source} -> ${target} 마이그레이션 중...`);
+      const result = await migrateCollection(db, source, target);
+      results.push(result);
+    }
+
+    // 결과 요약
+    console.log("\n" + "=".repeat(50));
+    console.log("📊 마이그레이션 결과 요약\n");
+
+    for (const result of results) {
+      console.log(`${result.collection}:`);
+      console.log(`  - 마이그레이션됨: ${result.migrated}`);
+      console.log(`  - 건너뜀 (이미 존재): ${result.skipped}`);
+      if (result.errors.length > 0) {
+        console.log(`  - 에러: ${result.errors.length}`);
+      }
+    }
+
+    // 소스 컬렉션 삭제 여부 확인 메시지
+    console.log("\n" + "=".repeat(50));
+    console.log("⚠️  주의: 소스 컬렉션(user, session, account, verification)은 삭제되지 않았습니다.");
+    console.log("    마이그레이션이 성공적으로 완료되었는지 확인 후 수동으로 삭제하세요:");
+    console.log("    MongoDB Shell에서:");
+    console.log("      db.user.drop()");
+    console.log("      db.session.drop()");
+    console.log("      db.account.drop()");
+    console.log("      db.verification.drop()");
+
+  } catch (error) {
+    console.error("❌ 마이그레이션 실패:", error);
+    process.exit(1);
+  } finally {
+    await client.close();
+    console.log("\n✅ MongoDB 연결 종료");
+  }
+}
+
+main();

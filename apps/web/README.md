@@ -29,3 +29,6 @@ pnpm dev              # Start with watch mode
 pnpm start            # Start server
 pnpm prisma:seed      # Seed database
 ```
+
+### Vendor Registration Link Example
+ - http://localhost:3000/vendor-register?token=faae9c23fb5f1b25a041b0b1590e0d745d28900eb669b6050e2739ffa6308303

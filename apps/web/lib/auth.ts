@@ -1,22 +1,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { genericOAuth } from "better-auth/plugins";
-import { MongoClient } from "mongodb";
-
-// MongoDB 클라이언트 싱글턴
-const globalForMongo = globalThis as unknown as {
-  mongoClient: MongoClient | undefined;
-};
-
-const mongoClient =
-  globalForMongo.mongoClient ??
-  new MongoClient(process.env.DATABASE_URL || "mongodb://localhost:27017/sdm");
-
-if (process.env.NODE_ENV !== "production") {
-  globalForMongo.mongoClient = mongoClient;
-}
-
-const db = mongoClient.db();
+import { mongoClient, db } from "./mongodb";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
@@ -85,18 +70,9 @@ export const auth = betterAuth({
     }),
   ],
 
-  // 세션 설정
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7일
-    updateAge: 60 * 60 * 24, // 24시간마다 갱신
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5, // 5분 캐시
-    },
-  },
-
   // 사용자 추가 필드
   user: {
+    modelName: "User", // Prisma 스키마와 일치시키기 위해 대문자 사용
     additionalFields: {
       role: {
         type: "string",
@@ -109,9 +85,25 @@ export const auth = betterAuth({
     },
   },
 
+  // 세션 컬렉션 이름 설정
+  session: {
+    modelName: "Session", // Prisma 스키마와 일치
+    expiresIn: 60 * 60 * 24 * 7, // 7일
+    updateAge: 60 * 60 * 24, // 24시간마다 갱신
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5, // 5분 캐시
+    },
+  },
+
+  // 계정 컬렉션 이름 설정
+  account: {
+    modelName: "Account", // Prisma 스키마와 일치
+  },
+
   // 콜백 함수
   callbacks: {
-    onUserCreated: async (user) => {
+    onUserCreated: async (user: { id: string }) => {
       console.log("[Auth] New user created:", user.id);
     },
   },

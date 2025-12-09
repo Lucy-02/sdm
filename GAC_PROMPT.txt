@@ -4,15 +4,15 @@ For each commit, provide:
 
 1. A clear, descriptive title (under 72 characters)
 2. A blank line
-3. What was changed (2-4 sentences)
+3. What was changed (2-4 sentences, each line starts with "  - ", under 60 characters)
 
 Use technical precision. Reference specific functions, classes, and modules.
 Use present tense and active voice.
-
-Refer to ./claude/current.md if you need
+Do not use local expressions like "Phase 1, Stage 2, ...".
+Refer to ./claude/current.md if you need.
 
 Example:
 Refactor authentication middleware to use dependency injection
 
-Replaced global auth state with injectable AuthService. Updated
-all route handlers to accept AuthService through constructor injection.
+  - Replaced global auth state with injectable AuthService. Updated
+  - all route handlers to accept AuthService through constructor injection.

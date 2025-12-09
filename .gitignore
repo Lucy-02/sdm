@@ -50,3 +50,6 @@ lerna-debug.log*
 # Logs
 logs
 *.log
+
+# Claude Code
+.claude

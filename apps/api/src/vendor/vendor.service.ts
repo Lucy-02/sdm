@@ -13,6 +13,8 @@ export interface VendorQueryDto {
   sortOrder?: 'asc' | 'desc';
 }
 
+// TODO: FATAL - NOT WORKING
+
 @Injectable()
 export class VendorService {
   constructor(private prisma: PrismaService) {}

@@ -1,8 +1,8 @@
 # Current Work Status
 
 ## 📍 현재 위치
-**파일**: apps/web/app/login/page.tsx, apps/web/components/layout/Header.tsx
-**작업**: Better Auth Phase 4 구현 완료 - 로그인/회원가입/헤더 연동
+**파일**: apps/web/app/vendor-register/page.tsx
+**작업**: Vendor Register 페이지 구현 완료 - 초대 링크 기반 업체 회원가입
 
 ## 🎯 현재 작업
 **Better Auth를 사용한 Auth 시스템 구현** (옵션 선택 완료 ✅)
@@ -116,13 +116,22 @@
     - POST /api/auth/sign-in/email: 로그인 성공
     - GET /api/auth/get-session: 세션 조회
     - MongoDB에 user, session, account 컬렉션 정상 저장
-47. ✅ **Phase 4 Better Auth UI 연동 완료** ⭐ NEW
+47. ✅ **Phase 4 Better Auth UI 연동 완료**
     - apps/web/app/register/page.tsx: signUp.email 연동, 소셜 로그인
     - apps/web/app/login/page.tsx: signIn.email 연동, callbackUrl 처리
     - apps/web/components/layout/Header.tsx: useSession, signOut 연동
     - 로딩 상태 표시 (Loader2 스피너)
     - 에러 메시지 표시
     - 모바일/데스크톱 반응형 사용자 메뉴
+48. ✅ **Vendor Register 페이지 구현 완료** ⭐ NEW
+    - VendorInvite 모델 추가 (Prisma)
+    - 초대 토큰 기반 접근 제어
+    - 2단계 멀티 스텝 폼 (Owner → Vendor)
+    - Step1OwnerInfo: 대표자 정보 입력
+    - Step2VendorInfo: 업체 상세 정보 입력
+    - Zustand 스토어로 폼 상태 관리 (persist)
+    - POST /api/vendor-register: 트랜잭션 기반 회원가입
+    - GET/POST /api/vendor-invite: 토큰 검증/생성
 
 ### 🔄 MongoDB 마이그레이션 상세
 - ✅ Prisma provider: `postgresql` → `mongodb`
@@ -203,8 +212,9 @@
 - [008_postgresql_vs_mongodb.md](../docs/DKB/008_postgresql_vs_mongodb.md)
 - [009_auth_library_research.md](../docs/DKB/009_auth_library_research.md)
 - [010_auth_system_plan.md](../docs/plan/010_auth_system_plan.md)
-- [011_better_auth_guide.md](../docs/DKB/011_better_auth_guide.md) ⭐ NEW
-- [012_phase3_implementation_plan.md](../docs/plan/012_phase3_implementation_plan.md) ⭐ NEW
+- [011_better_auth_guide.md](../docs/DKB/011_better_auth_guide.md)
+- [012_phase3_implementation_plan.md](../docs/plan/012_phase3_implementation_plan.md)
+- [014_vendor_register_plan.md](../docs/plan/014_vendor_register_plan.md) ⭐ NEW
 
 ## 📝 메모
 - Frontend: Next.js 15 + TypeScript + Tailwind
@@ -282,13 +292,29 @@ apps/api/prisma/migrations/20251205015830_init/  ✅ NEW (DB 마이그레이션)
 ```
 
 ## ⏰ 마지막 업데이트
-2025-12-09 (Phase 4 Better Auth UI 연동 완료 - 로그인/회원가입/헤더)
+2025-12-09 (Vendor Register 페이지 구현 완료 - 초대 링크 기반 업체 회원가입)
 
-## 📝 최근 변경 사항 (Phase 4 Better Auth UI 연동)
+## 📝 최근 변경 사항 (Vendor Register 구현)
+### 새로 생성된 파일
+- `apps/api/prisma/schema.prisma` - VendorInvite 모델 추가
+- `apps/web/types/vendor-register.ts` - 타입 정의
+- `apps/web/store/useVendorRegisterStore.ts` - Zustand 스토어
+- `apps/web/lib/vendor-invite.ts` - 초대 토큰 유틸
+- `apps/web/lib/mongodb.ts` - MongoDB 클라이언트 싱글턴
+- `apps/web/app/vendor-register/page.tsx` - 메인 페이지
+- `apps/web/app/vendor-register/steps/Step1OwnerInfo.tsx` - Owner 폼
+- `apps/web/app/vendor-register/steps/Step2VendorInfo.tsx` - Vendor 폼
+- `apps/web/app/api/vendor-invite/validate/route.ts` - 토큰 검증 API
+- `apps/web/app/api/vendor-invite/create/route.ts` - 토큰 생성 API
+- `apps/web/app/api/vendor-register/route.ts` - 회원가입 API
+
 ### 수정된 파일
-- `apps/web/app/register/page.tsx` - signUp.email 연동, 소셜 로그인 핸들러
-- `apps/web/app/login/page.tsx` - signIn.email 연동, callbackUrl 처리
-- `apps/web/components/layout/Header.tsx` - useSession, signOut, 사용자 메뉴
+- `apps/web/lib/auth.ts` - MongoDB 클라이언트 import 분리
+
+### 이전 Phase 4 변경 사항
+- `apps/web/app/register/page.tsx` - signUp.email 연동
+- `apps/web/app/login/page.tsx` - signIn.email 연동
+- `apps/web/components/layout/Header.tsx` - useSession, signOut
 
 ### 이전 Phase 3 생성 파일
 - `apps/web/lib/auth.ts` - Better Auth 서버 설정 (MongoDB 어댑터)

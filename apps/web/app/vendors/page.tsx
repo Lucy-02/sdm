@@ -321,8 +321,9 @@ export default function VendorsPage() {
                       : `${selectedCategories.length}개 선택됨`}
                 </span>
                 <ChevronDown
+                  
                   size={18}
-                  className={`transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''} mr-4`}
                 />
               </button>
 

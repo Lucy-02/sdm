@@ -324,3 +324,23 @@ model Booking {
   @@index([status])
   @@index([eventDate])
 }
+
+// ============================================
+// Vendor Invite (업체 초대 링크)
+// ============================================
+
+model VendorInvite {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  token       String    @unique                 // 초대 토큰 (UUID 또는 랜덤 문자열)
+  email       String?                           // 특정 이메일 지정 (선택)
+  categoryId  String?   @db.ObjectId            // 카테고리 사전 지정 (선택)
+
+  expiresAt   DateTime                          // 만료 시간
+  usedAt      DateTime?                         // 사용 시간
+  usedBy      String?   @db.ObjectId            // 사용한 사용자 ID
+
+  createdBy   String    @db.ObjectId            // 생성한 관리자 ID
+  createdAt   DateTime  @default(now())
+
+  @@index([expiresAt])
+}
