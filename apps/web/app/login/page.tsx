@@ -2,19 +2,59 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { signIn } from '@/lib/auth-client';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 백엔드 연결 시 로그인 로직 구현
-    console.log('Login:', { email, password, rememberMe });
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await signIn.email({
+        email,
+        password,
+        rememberMe,
+      });
+
+      if (result.error) {
+        setError(result.error.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
+        return;
+      }
+
+      // 로그인 성공 - callbackUrl이 있으면 해당 페이지로, 없으면 홈으로
+      const callbackUrl = searchParams.get('callbackUrl') || '/';
+      router.push(callbackUrl);
+      router.refresh();
+    } catch (err) {
+      setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'kakao' | 'naver') => {
+    try {
+      const callbackUrl = searchParams.get('callbackUrl') || '/';
+      await signIn.social({
+        provider,
+        callbackURL: callbackUrl,
+      });
+    } catch (err) {
+      setError('소셜 로그인 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -33,6 +73,13 @@ export default function LoginPage() {
 
         {/* 로그인 폼 */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* 이메일 입력 */}
             <div>
@@ -101,10 +148,20 @@ export default function LoginPage() {
             {/* 로그인 버튼 */}
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-[#C58D8D] to-[#B36B6B] hover:from-[#B36B6B] hover:to-[#A05A5A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
+              disabled={loading}
+              className="w-full h-12 bg-gradient-to-r from-[#C58D8D] to-[#B36B6B] hover:from-[#B36B6B] hover:to-[#A05A5A] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              로그인
-              <ArrowRight className="w-4 h-4 ml-2" />
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  로그인 중...
+                </>
+              ) : (
+                <>
+                  로그인
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           </form>
 
@@ -122,6 +179,7 @@ export default function LoginPage() {
           <div className="space-y-3">
             <button
               type="button"
+              onClick={() => handleSocialLogin('google')}
               className="w-full flex items-center justify-center gap-3 h-12 border border-neutral-300 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -147,6 +205,7 @@ export default function LoginPage() {
 
             <button
               type="button"
+              onClick={() => handleSocialLogin('kakao')}
               className="w-full flex items-center justify-center gap-3 h-12 bg-[#FEE500] rounded-xl text-sm font-medium text-[#000000] hover:bg-[#FDD800] transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -160,6 +219,7 @@ export default function LoginPage() {
 
             <button
               type="button"
+              onClick={() => handleSocialLogin('naver')}
               className="w-full flex items-center justify-center gap-3 h-12 bg-[#03C75A] rounded-xl text-sm font-medium text-white hover:bg-[#02B150] transition-colors"
             >
               <span className="font-bold text-lg">N</span>

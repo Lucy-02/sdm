@@ -1,8 +1,8 @@
 # Current Work Status
 
 ## 📍 현재 위치
-**파일**: apps/web/lib/auth.ts, apps/web/lib/auth-client.ts
-**작업**: Better Auth Phase 3 구현 완료 - 인증 API 테스트 성공
+**파일**: apps/web/app/login/page.tsx, apps/web/components/layout/Header.tsx
+**작업**: Better Auth Phase 4 구현 완료 - 로그인/회원가입/헤더 연동
 
 ## 🎯 현재 작업
 **Better Auth를 사용한 Auth 시스템 구현** (옵션 선택 완료 ✅)
@@ -111,11 +111,18 @@
     - types/auth.d.ts: 타입 확장
     - next.config.js: /api/auth/* 프록시 제외
     - .env.local: DATABASE_URL 수정 (directConnection, replicaSet)
-46. ✅ **인증 API 테스트 성공** ⭐ NEW
+46. ✅ **인증 API 테스트 성공**
     - POST /api/auth/sign-up/email: 회원가입 성공
     - POST /api/auth/sign-in/email: 로그인 성공
     - GET /api/auth/get-session: 세션 조회
     - MongoDB에 user, session, account 컬렉션 정상 저장
+47. ✅ **Phase 4 Better Auth UI 연동 완료** ⭐ NEW
+    - apps/web/app/register/page.tsx: signUp.email 연동, 소셜 로그인
+    - apps/web/app/login/page.tsx: signIn.email 연동, callbackUrl 처리
+    - apps/web/components/layout/Header.tsx: useSession, signOut 연동
+    - 로딩 상태 표시 (Loader2 스피너)
+    - 에러 메시지 표시
+    - 모바일/데스크톱 반응형 사용자 메뉴
 
 ### 🔄 MongoDB 마이그레이션 상세
 - ✅ Prisma provider: `postgresql` → `mongodb`
@@ -154,12 +161,12 @@
 
 ### 다음 단계 (Better Auth 구현)
 1. ✅ MongoDB 마이그레이션 완료
-2. ✅ **Better Auth 시스템 구현** ⭐ Phase 3 완료
+2. ✅ **Better Auth 시스템 구현** ⭐ Phase 4 완료
    - ✅ Phase 1: 패키지 설치 및 환경 설정
    - ✅ Phase 2: Prisma 스키마 업데이트 (Session, Account, Verification)
    - ✅ Phase 3: Next.js Better Auth 설정 (MongoDB 네이티브 어댑터)
-   - ⏳ **Phase 4: 로그인/회원가입 페이지 연동** ← 다음 구현
-   - Phase 5: NestJS 통합
+   - ✅ **Phase 4: 로그인/회원가입 페이지 연동** ⭐ 완료!
+   - ⏳ Phase 5: NestJS 통합 ← 다음 구현 (필요시)
    - Phase 6: 테스트
 3. 백엔드/프론트엔드 통합 테스트
 4. S3/R2 스토리지 연동 (실제 이미지 저장)
@@ -275,20 +282,20 @@ apps/api/prisma/migrations/20251205015830_init/  ✅ NEW (DB 마이그레이션)
 ```
 
 ## ⏰ 마지막 업데이트
-2025-12-09 (Phase 3 Better Auth 구현 완료 - 인증 API 테스트 성공)
+2025-12-09 (Phase 4 Better Auth UI 연동 완료 - 로그인/회원가입/헤더)
 
-## 📝 최근 변경 사항 (Phase 3 Better Auth)
-### 새로 생성된 파일
+## 📝 최근 변경 사항 (Phase 4 Better Auth UI 연동)
+### 수정된 파일
+- `apps/web/app/register/page.tsx` - signUp.email 연동, 소셜 로그인 핸들러
+- `apps/web/app/login/page.tsx` - signIn.email 연동, callbackUrl 처리
+- `apps/web/components/layout/Header.tsx` - useSession, signOut, 사용자 메뉴
+
+### 이전 Phase 3 생성 파일
 - `apps/web/lib/auth.ts` - Better Auth 서버 설정 (MongoDB 어댑터)
 - `apps/web/lib/auth-client.ts` - Better Auth 클라이언트 훅
-- `apps/web/lib/prisma.ts` - Prisma 싱글턴 (사용 안 함)
 - `apps/web/app/api/auth/[...all]/route.ts` - API 핸들러
 - `apps/web/middleware.ts` - 라우트 보호
 - `apps/web/types/auth.d.ts` - 타입 확장
-
-### 수정된 파일
-- `apps/web/next.config.js` - /api/auth/* 프록시 제외
-- `apps/web/.env.local` - MongoDB 연결 URL 수정 (directConnection, replicaSet)
 
 ### 이전 변경 사항
 - `apps/web/components/layout/Header.tsx` - 전역 헤더 컴포넌트

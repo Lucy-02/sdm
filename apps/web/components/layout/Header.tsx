@@ -15,7 +15,11 @@ import {
   Palette,
   Building2,
   Shirt,
+  LogOut,
+  Settings,
+  Loader2,
 } from 'lucide-react';
+import { useSession, signOut } from '@/lib/auth-client';
 
 const categories = [
   { name: '스튜디오', slug: 'studio', icon: Camera, color: 'text-[#8E808A]' },
@@ -27,15 +31,23 @@ const categories = [
 
 export default function Header() {
   const router = useRouter();
+  const { data: session, isPending } = useSession();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/vendors?search=${encodeURIComponent(searchQuery.trim())}`);
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/');
+    router.refresh();
   };
 
   return (
@@ -128,13 +140,58 @@ export default function Header() {
               <Heart className="w-5 h-5" />
             </Link>
 
-            <Link
-              href="/login"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 hover:text-[#C58D8D] hover:bg-neutral-50 rounded-lg transition-colors"
-            >
-              <User className="w-4 h-4" />
-              로그인
-            </Link>
+            {isPending ? (
+              <div className="p-2">
+                <Loader2 className="w-5 h-5 animate-spin text-neutral-400" />
+              </div>
+            ) : session ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  onBlur={() => setTimeout(() => setIsUserMenuOpen(false), 150)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-neutral-700 hover:text-[#C58D8D] hover:bg-neutral-50 rounded-lg transition-colors"
+                >
+                  <div className="w-7 h-7 bg-gradient-to-br from-[#C58D8D] to-[#B36B6B] rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-semibold">
+                      {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <span className="max-w-[100px] truncate">{session.user.name || '사용자'}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isUserMenuOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-neutral-200 rounded-xl shadow-lg py-2 z-50">
+                    <div className="px-4 py-2 border-b border-neutral-100">
+                      <p className="text-sm font-medium text-neutral-800 truncate">{session.user.name}</p>
+                      <p className="text-xs text-neutral-500 truncate">{session.user.email}</p>
+                    </div>
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"
+                    >
+                      <Settings className="w-4 h-4" />
+                      내 정보
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 hover:text-[#C58D8D] hover:bg-neutral-50 rounded-lg transition-colors"
+              >
+                <User className="w-4 h-4" />
+                로그인
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -217,14 +274,50 @@ export default function Header() {
 
             <div className="border-t border-neutral-200 my-2" />
 
-            <Link
-              href="/login"
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C58D8D] hover:bg-neutral-50 rounded-lg"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <User className="w-5 h-5" />
-              로그인 / 회원가입
-            </Link>
+            {session ? (
+              <>
+                <div className="px-3 py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#C58D8D] to-[#B36B6B] rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold">
+                        {session.user.name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-neutral-800">{session.user.name}</p>
+                      <p className="text-xs text-neutral-500">{session.user.email}</p>
+                    </div>
+                  </div>
+                </div>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-3 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Settings className="w-5 h-5" />
+                  내 정보
+                </Link>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  <LogOut className="w-5 h-5" />
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-[#C58D8D] hover:bg-neutral-50 rounded-lg"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="w-5 h-5" />
+                로그인 / 회원가입
+              </Link>
+            )}
           </nav>
         </div>
       )}
