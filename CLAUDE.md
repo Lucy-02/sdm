@@ -41,18 +41,33 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
 └── templates/                   # 문서 템플릿
 ```
 
-## 🔢 Global Numbering 체계
+## 🔢 브랜치 기반 Global Numbering 체계
 
-- **생성 순서 기반**: 001, 002, 003... (디렉토리 무관)
-- **중앙 관리**: `.claude/context/index.md`
-- **제외 파일**: CLAUDE.md, current.md, dialog/*.md
+### 파일명 형식
+```
+{branch}_{number}_{name}_{type}.md
+예: feature-auth_001_jwt_implementation_todo.md
+예: master_003_database_structure.md
+```
 
-### 📌 문서 생성 시 필수 확인
-**새 numbered 문서 생성 전 반드시:**
+### 핵심 규칙
+- **브랜치별 독립 번호**: 각 브랜치는 001부터 시작하는 독립적 번호 체계
+- **브랜치 이름 정규화**: `/` → `-`, 소문자 변환
+- **중앙 관리**: `.claude/context/index.md` (브랜치별 섹션)
+- **Merge 친화적**: 브랜치 prefix로 파일명 충돌 방지
+
+### 📌 문서 생성 방법
+**스크립트 사용 (권장):**
+```bash
+./.claude/scripts/claude-new-doc.sh plan "authentication_system"
+# 자동으로 현재 브랜치 감지, 번호 할당, index.md 업데이트
+```
+
+**수동 생성 시:**
 1. `.claude/context/index.md` 열기
-2. "다음 번호" 확인
-3. 해당 번호로 문서 생성
-4. index.md에 즉시 기록
+2. 현재 브랜치 섹션에서 "다음 번호" 확인
+3. `{branch}_{number}_{name}_{type}.md` 형식으로 문서 생성
+4. index.md 브랜치 섹션에 즉시 기록
 
 ## ⚡ 핵심 원칙
 
@@ -69,9 +84,11 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
    - `.claude/docs/structure/` 내 관련 문서
    - 파일 생성/수정/삭제 반영
 
-3. **지식 문서** - 발견 즉시
+3. **지식 문서** - 발견 즉시 (자동 트리거!)
    - `.claude/docs/DKB/` - 새 패턴이나 해결책
+     - 🔥 **자동 생성**: 10분+ 소요, 3회+ 시도, 외부 참조, 패턴 반복 시
    - `.claude/docs/lexicon/` - 새 용어
+     - 🔥 **자동 생성**: 새 용어, 약어 사용, 용어 설명 필요 시
 
 4. **차단 문서** - 발견 즉시
    - `.claude/docs/dev_action/` - 외부 도움 필요 시

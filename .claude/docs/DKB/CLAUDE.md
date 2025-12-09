@@ -6,19 +6,25 @@
 
 ## 📝 문서 작성 규칙
 
-### 파일명 형식
+### 파일명 형식 (브랜치 기반)
 ```
-[global_number]_[topic]_knowledge.md
-예: 006_authentication_pattern_knowledge.md
-예: 007_performance_optimization_knowledge.md
+{branch}_{number}_{topic}_knowledge.md
+예: master_006_authentication_pattern_knowledge.md
+예: feature-perf_001_caching_optimization_knowledge.md
 ```
 
-### 📌 번호 할당 필수 확인
-**새 DKB 문서 생성 전 반드시:**
+### 📌 브랜치 기반 번호 할당
+**스크립트 사용 (권장):**
+```bash
+./.claude/scripts/claude-new-doc.sh dkb "topic_name"
+# 자동: 브랜치 감지 → 번호 할당 → index.md 업데이트
+```
+
+**수동 생성 시:**
 1. `.claude/context/index.md` 열기
-2. "다음 번호" 확인
-3. 해당 번호로 문서 생성
-4. index.md에 즉시 기록
+2. 현재 브랜치 섹션에서 "다음 번호" 확인
+3. `{branch}_{number}_{name}_knowledge.md` 형식으로 생성
+4. index.md 브랜치 섹션에 즉시 기록
 
 ### 지식 카테고리
 - **Architecture**: 설계 결정, 패턴

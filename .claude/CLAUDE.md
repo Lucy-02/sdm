@@ -53,36 +53,54 @@
 └── templates/           # 문서 템플릿
 ```
 
-## 🔢 Global Numbering 체계
+## 🔢 브랜치 기반 Global Numbering 체계
+
+### 파일명 형식
+```
+{branch}_{number}_{name}_{type}.md
+예: feature-auth_001_jwt_implementation_todo.md
+예: master_003_database_structure.md
+```
+
+### 브랜치 이름 정규화
+- 슬래시(/) → 하이픈(-) 변환
+- 소문자 변환
+- 예: `feature/auth-system` → `feature-auth-system`
 
 ### 번호 할당 규칙
-- **순차 번호**: 001, 002, 003... 생성 순서대로
-- **위치 무관**: 디렉토리와 관계없이 생성 시점 기준
+- **브랜치별 독립 번호**: 각 브랜치는 001부터 시작
+- **브랜치 내 순차**: 해당 브랜치 내에서만 순차 증가
 - **형식**: 3자리 숫자 (001-999)
-- **범위**: 001부터 시작, 999까지 사용 가능
+- **Merge 안전**: 브랜치 prefix로 충돌 방지
 
 ### 번호 관리
-- 모든 번호는 `.claude/context/index.md`에 기록
+- `.claude/context/index.md`에 브랜치별 섹션으로 관리
 - 생성 날짜/시간과 함께 기록
-- 한 번 할당된 번호는 절대 재사용 금지
-- 삭제된 파일의 번호도 보존
+- 한 번 할당된 번호는 해당 브랜치 내에서 재사용 금지
+- Merge 시 각 브랜치 섹션 독립적으로 보존
 
 ### 예시
 ```
-001_initial_setup_plan.md (in docs/plan/)
-002_authentication_todo.md (in docs/todo/)
-003_database_structure.md (in docs/structure/)
-004_api_pattern.md (in docs/DKB/)
-005_user_management_plan.md (in docs/plan/)
+master_001_initial_setup_plan.md (in docs/plan/)
+master_002_authentication_todo.md (in docs/todo/)
+feature-auth_001_jwt_implementation_todo.md (in docs/todo/)
+feature-auth_002_session_knowledge.md (in docs/DKB/)
 ```
 
-### 📌 문서 생성 시 필수 프로세스
+### 📌 문서 생성 방법
+**스크립트 사용 (권장):**
+```bash
+./.claude/scripts/claude-new-doc.sh plan "authentication_system"
+# 자동으로 현재 브랜치 감지, 번호 할당, index.md 업데이트
+```
+
+**수동 생성 시:**
 ```
 ⚠️ 새 numbered 문서 생성 전 반드시:
 1. .claude/context/index.md 열기
-2. "다음 번호" 확인 (예: 006)
-3. 해당 번호로 문서 생성
-4. index.md에 즉시 기록
+2. 현재 브랜치 섹션에서 "다음 번호" 확인
+3. {branch}_{number}_{name}_{type}.md 형식으로 문서 생성
+4. index.md 브랜치 섹션에 즉시 기록
 5. current.md 업데이트
 ```
 
@@ -124,6 +142,37 @@
 3. current.md 완료 상태 업데이트
 4. context/index.md 업데이트
 
+## 📚 DKB/Lexicon 자동 생성 트리거
+
+**⚠️ 아래 조건 발생 시 즉시 해당 문서를 생성하세요. 사용자 지시 없이도 자동으로!**
+
+### DKB 즉시 생성 조건
+| 트리거 | 설명 | 예시 |
+|--------|------|------|
+| ⏱️ **10분+ 소요** | 문제 해결에 10분 이상 걸림 | 디버깅, 설정 이슈 |
+| 🔄 **패턴 반복** | 같은 패턴을 2회 이상 사용 | 에러 핸들링, API 호출 |
+| 🐛 **3회+ 시도** | 해결까지 3번 이상 시도 | 버그 수정, 설정 변경 |
+| 📚 **외부 참조** | 외부 문서/Stack Overflow 참조 | 라이브러리 사용법 |
+| 💡 **재사용 가능** | "나중에도 쓸 것 같다" 판단 | 유틸리티 함수, 설정 |
+| ⚡ **성능 개선** | 최적화로 측정 가능한 개선 | 속도, 메모리 개선 |
+
+### Lexicon 즉시 생성 조건
+| 트리거 | 설명 | 예시 |
+|--------|------|------|
+| 🆕 **새 용어** | 처음 등장하는 도메인 용어 | 비즈니스 용어, 기술 용어 |
+| 🔤 **약어 사용** | 약어를 코드/문서에 사용 | API, JWT, SSO |
+| ❓ **설명 필요** | 코드에 용어 설명 주석 작성 | 복잡한 개념 설명 |
+| 🔗 **용어 혼동** | 비슷한 용어 구분 필요 | Auth vs Authorization |
+
+### 자가 점검 (매 작업 후)
+```
+작업 완료 시 스스로 질문:
+□ 이 작업에서 10분 이상 걸린 부분이 있었나? → DKB
+□ 외부 문서를 찾아봐야 했나? → DKB
+□ 새로운 용어/약어를 사용했나? → Lexicon
+□ 이 해결책을 다른 곳에서도 쓸 수 있나? → DKB
+```
+
 ## 🛠️ 도구 사용 가이드
 
 ### 자동화 스크립트 (`scripts/`)
@@ -131,12 +180,12 @@
 
 #### 📝 `claude-new-doc.sh`
 ```bash
-# 새 문서 생성 (번호 자동 할당)
+# 새 문서 생성 (브랜치 감지 + 번호 자동 할당)
 ./scripts/claude-new-doc.sh [type] [name]
 # 예: ./scripts/claude-new-doc.sh plan authentication
-# → 001_authentication_plan.md 생성 (번호 자동)
+# → master_001_authentication_plan.md 생성 (현재 브랜치: master)
 # → 템플릿 자동 적용
-# → index.md 자동 업데이트
+# → index.md 브랜치 섹션 자동 업데이트
 ```
 
 #### 🔗 `claude-check-links.sh`
