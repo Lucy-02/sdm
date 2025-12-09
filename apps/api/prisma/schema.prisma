@@ -2,26 +2,23 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 // ============================================
-// User & Auth
+// User & Auth (Better Auth)
 // ============================================
 
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
   name          String?
+  image         String?   // Better Auth 프로필 이미지
   phone         String?
-  password      String?   // 해싱된 비밀번호 (OAuth 시 null)
   role          String    @default("CUSTOMER")  // "CUSTOMER" | "VENDOR" | "ADMIN"
-
-  // OAuth
-  provider      String?   // google, kakao, naver
-  providerId    String?
 
   emailVerified Boolean   @default(false)
   isActive      Boolean   @default(true)
@@ -33,13 +30,66 @@ model User {
   // Favorite: 찜한 업체 ID 배열
   favoriteVendorIds String[] @db.ObjectId
 
-  // Relations (1:N은 유지)
+  // Better Auth Relations
+  sessions      Session[]
+  accounts      Account[]
+
+  // Business Relations
   simulationResults SimulationResult[]
   ownedVendors      Vendor[]           @relation("VendorOwner")
   reviews           Review[]
   bookings          Booking[]
+}
 
-  @@index([provider, providerId])
+model Session {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token         String    @unique
+  expiresAt     DateTime
+  ipAddress     String?
+  userAgent     String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId                String    @db.ObjectId
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accountId             String    // OAuth provider user ID
+  providerId            String    // "google", "kakao", "naver", "credential"
+
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?   // 이메일/비밀번호 인증용 (해싱됨)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  identifier  String    // 이메일 주소
+  value       String    // 인증 토큰
+  expiresAt   DateTime
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([identifier])
 }
 
 // ============================================

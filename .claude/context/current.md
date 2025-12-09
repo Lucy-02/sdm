@@ -1,11 +1,11 @@
 # Current Work Status
 
 ## 📍 현재 위치
-**파일**: apps/web/app/login/page.tsx, apps/web/app/register/page.tsx
-**작업**: 로그인/회원가입 페이지 UI 디자인 완료
+**파일**: apps/web/lib/auth.ts, apps/web/lib/auth-client.ts
+**작업**: Better Auth Phase 3 구현 완료 - 인증 API 테스트 성공
 
 ## 🎯 현재 작업
-로그인 및 회원가입 페이지 프론트엔드 UI 구현 (백엔드 연결 없이)
+**Better Auth를 사용한 Auth 시스템 구현** (옵션 선택 완료 ✅)
 
 ### 완료된 작업
 1. ✅ Monorepo 구조 생성 (Turborepo + pnpm workspace)
@@ -64,11 +64,58 @@
     - 자동 스크롤 + 드래그 공존
     - 호버 시 일시정지
     - 스냅 애니메이션 (가장 가까운 아이템으로)
-38. ✅ **로그인/회원가입 페이지 UI 디자인** ⭐ NEW
+38. ✅ **로그인/회원가입 페이지 UI 디자인**
     - 로그인 페이지: 이메일/비밀번호 입력, 소셜 로그인 (Google, 카카오, 네이버)
     - 회원가입 페이지: 이름/이메일/전화번호/비밀번호, 약관 동의, 비밀번호 유효성 검사
     - 프로젝트 컬러 테마 적용 (#C58D8D, #B36B6B)
     - 반응형 디자인, 그라데이션 배경
+39. ✅ **Auth 라이브러리 조사 문서 작성** ⭐ NEW
+    - NextAuth.js v5, Better Auth, Lucia Auth, Passport.js 비교
+    - 각 라이브러리별 장단점, 프로바이더 지원, 코드 예시
+    - 프로젝트 요구사항 매칭 분석
+40. ✅ **Auth 시스템 구현 계획 문서 작성**
+    - 옵션 1: Better Auth (권장 - 프론트/백 통합)
+    - 옵션 2: NextAuth.js (한국 프로바이더 기본 지원)
+    - 옵션 3: Passport.js (백엔드 중심)
+    - 비교 분석표 및 구현 단계 정리
+41. ✅ **Better Auth 선택 확정 및 상세 구현 계획 작성**
+    - Better Auth v1.3+ 사용
+    - MongoDB adapter 연동
+    - Next.js + NestJS 통합 아키텍처 설계
+    - 6단계 Phase별 구현 계획 수립
+    - 네이버 로그인 Generic OAuth 설정
+42. ✅ **Phase 1-2 완료** ⭐ NEW
+    - better-auth, @prisma/adapter-prisma 패키지 설치
+    - .env.local 환경 변수 설정 (BETTER_AUTH_SECRET, OAuth 키)
+    - Prisma 스키마 업데이트 (Session, Account, Verification 모델)
+    - User 모델 수정 (image 필드 추가, relations 설정)
+    - prisma db push 성공
+43. ✅ **Better Auth 지식 문서 작성 (011)** ⭐ NEW
+    - 인증 흐름 시퀀스 다이어그램
+    - 데이터 모델 설명 (User, Session, Account, Verification)
+    - 서버/클라이언트 설정 가이드
+    - Generic OAuth (Naver) 설정
+    - NestJS 통합 패턴
+    - 트러블슈팅 가이드
+44. ✅ **Phase 3 구현 계획 문서 작성 (012)**
+    - lib/auth.ts 서버 설정
+    - lib/auth-client.ts 클라이언트 설정
+    - API 라우트 핸들러
+    - Middleware 설정
+45. ✅ **Phase 3 Better Auth 구현 완료** ⭐ NEW
+    - lib/auth.ts: MongoDB 네이티브 어댑터 사용
+    - lib/auth-client.ts: React 클라이언트 훅
+    - lib/prisma.ts: Prisma 싱글턴 (삭제됨 - MongoDB 네이티브로 변경)
+    - app/api/auth/[...all]/route.ts: API 핸들러
+    - middleware.ts: 라우트 보호
+    - types/auth.d.ts: 타입 확장
+    - next.config.js: /api/auth/* 프록시 제외
+    - .env.local: DATABASE_URL 수정 (directConnection, replicaSet)
+46. ✅ **인증 API 테스트 성공** ⭐ NEW
+    - POST /api/auth/sign-up/email: 회원가입 성공
+    - POST /api/auth/sign-in/email: 로그인 성공
+    - GET /api/auth/get-session: 세션 조회
+    - MongoDB에 user, session, account 컬렉션 정상 저장
 
 ### 🔄 MongoDB 마이그레이션 상세
 - ✅ Prisma provider: `postgresql` → `mongodb`
@@ -105,13 +152,20 @@
 - ✅ GET /api/vendors/:id - 특정 업체 상세 정보
 - ✅ Query 파라미터 타입 변환 (page, limit, priceMin, priceMax)
 
-### 다음 단계
+### 다음 단계 (Better Auth 구현)
 1. ✅ MongoDB 마이그레이션 완료
-2. 백엔드/프론트엔드 통합 테스트
-3. S3/R2 스토리지 연동 (실제 이미지 저장)
-4. AI 처리 큐 시스템 구현 (BullMQ)
-5. WebSocket으로 실시간 진행 상태 전달
-6. 결과 페이지 구현 및 업체 매칭 기능
+2. ✅ **Better Auth 시스템 구현** ⭐ Phase 3 완료
+   - ✅ Phase 1: 패키지 설치 및 환경 설정
+   - ✅ Phase 2: Prisma 스키마 업데이트 (Session, Account, Verification)
+   - ✅ Phase 3: Next.js Better Auth 설정 (MongoDB 네이티브 어댑터)
+   - ⏳ **Phase 4: 로그인/회원가입 페이지 연동** ← 다음 구현
+   - Phase 5: NestJS 통합
+   - Phase 6: 테스트
+3. 백엔드/프론트엔드 통합 테스트
+4. S3/R2 스토리지 연동 (실제 이미지 저장)
+5. AI 처리 큐 시스템 구현 (BullMQ)
+6. WebSocket으로 실시간 진행 상태 전달
+7. 결과 페이지 구현 및 업체 매칭 기능
 
 ## 📊 진행 상황
 - [x] 기술 스택 추천 완료
@@ -138,8 +192,12 @@
 - [004_initial_setup_review.md](../docs/review/004_initial_setup_review.md)
 - [005_nestjs_basics.md](../docs/DKB/005_nestjs_basics.md)
 - [006_prisma_basics.md](../docs/DKB/006_prisma_basics.md)
-- [007_mongodb_migration_plan.md](../docs/plan/007_mongodb_migration_plan.md) ⭐ NEW
-- [008_postgresql_vs_mongodb.md](../docs/DKB/008_postgresql_vs_mongodb.md) ⭐ NEW
+- [007_mongodb_migration_plan.md](../docs/plan/007_mongodb_migration_plan.md)
+- [008_postgresql_vs_mongodb.md](../docs/DKB/008_postgresql_vs_mongodb.md)
+- [009_auth_library_research.md](../docs/DKB/009_auth_library_research.md)
+- [010_auth_system_plan.md](../docs/plan/010_auth_system_plan.md)
+- [011_better_auth_guide.md](../docs/DKB/011_better_auth_guide.md) ⭐ NEW
+- [012_phase3_implementation_plan.md](../docs/plan/012_phase3_implementation_plan.md) ⭐ NEW
 
 ## 📝 메모
 - Frontend: Next.js 15 + TypeScript + Tailwind
@@ -217,10 +275,22 @@ apps/api/prisma/migrations/20251205015830_init/  ✅ NEW (DB 마이그레이션)
 ```
 
 ## ⏰ 마지막 업데이트
-2025-12-08 (ImageCarousel 드래그 기능 추가)
+2025-12-09 (Phase 3 Better Auth 구현 완료 - 인증 API 테스트 성공)
 
-## 📝 최근 변경 사항
+## 📝 최근 변경 사항 (Phase 3 Better Auth)
 ### 새로 생성된 파일
+- `apps/web/lib/auth.ts` - Better Auth 서버 설정 (MongoDB 어댑터)
+- `apps/web/lib/auth-client.ts` - Better Auth 클라이언트 훅
+- `apps/web/lib/prisma.ts` - Prisma 싱글턴 (사용 안 함)
+- `apps/web/app/api/auth/[...all]/route.ts` - API 핸들러
+- `apps/web/middleware.ts` - 라우트 보호
+- `apps/web/types/auth.d.ts` - 타입 확장
+
+### 수정된 파일
+- `apps/web/next.config.js` - /api/auth/* 프록시 제외
+- `apps/web/.env.local` - MongoDB 연결 URL 수정 (directConnection, replicaSet)
+
+### 이전 변경 사항
 - `apps/web/components/layout/Header.tsx` - 전역 헤더 컴포넌트
 - `apps/web/components/layout/Footer.tsx` - 전역 푸터 컴포넌트
 

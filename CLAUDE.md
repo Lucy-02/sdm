@@ -141,6 +141,41 @@ Context Compact(토큰 한계로 인한 컨텍스트 재설정)가 발생하면:
 - `mcp__sequential-thinking`: 복잡한 의사결정
 - `TodoWrite`: 작업 추적
 
+## 🔧 개발 환경 설정
+
+### 패키지 매니저 (pnpm)
+
+이 프로젝트는 pnpm workspace를 사용합니다. **pnpm 명령어는 반드시 `npx pnpm`으로 실행해야 합니다.**
+
+```bash
+# ✅ 올바른 사용법
+npx pnpm install
+npx pnpm add <package> --filter web
+npx pnpm add <package> --filter api
+
+# ❌ 잘못된 사용법 (pnpm이 전역 설치되어 있지 않음)
+pnpm install
+```
+
+### 주요 명령어
+
+```bash
+# 의존성 설치
+npx pnpm install
+
+# 특정 앱에 패키지 추가
+npx pnpm add <package> --filter web    # Next.js 앱
+npx pnpm add <package> --filter api    # NestJS 앱
+
+# 개발 서버 실행
+npx pnpm dev --filter web
+npx pnpm dev --filter api
+
+# Prisma 명령어
+npx pnpm prisma generate --filter api
+npx pnpm prisma db push --filter api
+```
+
 ---
 
 > **중요**: 이 문서는 간략한 안내입니다. 실제 작업 시에는 반드시 [.claude/CLAUDE.md](.claude/CLAUDE.md)의 전체 가이드를 따르세요.

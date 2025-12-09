@@ -12,8 +12,12 @@
 | 006 | 006_prisma_basics.md | docs/DKB/ | 2025-12-05 14:12 | Prisma ORM 기본 개념 및 쿼리 사용법 |
 | 007 | 007_mongodb_migration_plan.md | docs/plan/ | 2025-12-05 (현재) | PostgreSQL → MongoDB 마이그레이션 계획 |
 | 008 | 008_postgresql_vs_mongodb.md | docs/DKB/ | 2025-12-05 (현재) | PostgreSQL vs MongoDB 차이점 및 Many-to-Many 관계 설명 |
+| 009 | 009_auth_library_research.md | docs/DKB/ | 2025-12-09 | Auth 라이브러리 비교 조사 (NextAuth, Better Auth, Lucia, Passport) |
+| 010 | 010_auth_system_plan.md | docs/plan/ | 2025-12-09 | Auth 시스템 구현 계획 (3가지 옵션 비교) |
+| 011 | 011_better_auth_guide.md | docs/DKB/ | 2025-12-09 | Better Auth 상세 가이드 (흐름, 원리, 설정) |
+| 012 | 012_phase3_implementation_plan.md | docs/plan/ | 2025-12-09 | Phase 3 Better Auth 구현 계획 |
 
-## 🔢 다음 번호: 009
+## 🔢 다음 번호: 013
 
 ## 📝 번호 할당 규칙
 - 디렉토리 위치와 무관하게 생성 시점 순서대로 할당
@@ -32,7 +36,7 @@
 - index.md (이 파일)
 
 ## 📊 통계
-- 총 생성 문서: 6
-- 활성 문서: 6
+- 총 생성 문서: 12
+- 활성 문서: 12
 - 삭제 문서: 0
-- 최근 생성: 006_prisma_basics.md (2025-12-05 14:12)
+- 최근 생성: 012_phase3_implementation_plan.md (2025-12-09)

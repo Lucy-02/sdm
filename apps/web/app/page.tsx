@@ -57,7 +57,7 @@ export default function Home() {
       <div className="text-center">
         <h1 className="text-4xl font-bold mb-4">TITLE</h1>
       </div>
-      {/* hwakjanghyeong Search Bar */}
+      {/* 확장형 Search Bar */}
       {/* <motion.div
         onHoverStart={() => {
           setExpand(true);
@@ -194,7 +194,7 @@ export default function Home() {
         </motion.div>
       </motion.div> */}
 
-      <div className="w-[1200px] h-[280px] flex gap-6 p-8">
+      <div className="w-[1230px] h-[280px] flex gap-6 p-8">
         {/* 스튜디오 */}
         <Link href="/vendors?category=studio" className="flex-1 group">
           <div className="h-full bg-gradient-to-br from-[#B3A3B4] to-[#8E808A] rounded-xl shadow-lg hover:shadow-2xl transition-all duration-200 flex flex-col items-center justify-center gap-2 hover:scale-[102%]">
@@ -245,8 +245,6 @@ export default function Home() {
           itemHeight={220}
           displayCount={4}
           gap={12}
-          delay={2}
-          repeatDelay={4}
           returnToStart={true}
           className="py-2"
         >
@@ -358,7 +356,7 @@ export default function Home() {
 
       <Link
         href="/simulator"
-        className="flex justify-center min-w-[300px] text-sm bg-[#C58D8D] rounded-xl items-center p-4 shadow-xl hover:bg-opacity-80 duration-200"
+        className="flex justify-center min-w-[400px] text-sm bg-[#C58D8D] rounded-xl items-center p-4 shadow-xl hover:bg-opacity-80 duration-200"
       >
         <button className="w-full font-semibold text-white text-center">
           웨딩사진 만들어 보기

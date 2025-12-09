@@ -32,7 +32,7 @@ export default function Result() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
+    <div className="w-full min-h-[calc(100vh-64px)] flex items-center justify-center">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
@@ -82,7 +82,7 @@ export default function Result() {
               </p>
             </div>
 
-            <div className="relative w-full aspect-[5/3] rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200">
+            <div className="relative w-full aspect-[5.5/3] rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200">
               <div className="w-full h-full flex items-center justify-center">
                 <div className="text-center space-y-3">
                   <Camera className="w-20 h-20 text-neutral-300 mx-auto" />

@@ -407,10 +407,10 @@ export default function VendorsPage() {
       {/* 업체 목록 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* 결과 개수 및 통계 */}
-        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
+        <div className="mb-8 flex justify-between flex-wrap gap-4">
           <div className="text-neutral-600">
             총{' '}
-            <span className="font-bold text-xl text-neutral-800">
+            <span className="font-bold text-neutral-800">
               {filteredAndSortedVendors.length}
             </span>
             개의 업체
