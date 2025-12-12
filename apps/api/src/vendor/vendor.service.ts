@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 export interface VendorQueryDto {
   categoryId?: string;
+  category?: string; // slug로 카테고리 필터링
   location?: string;
   priceMin?: number;
   priceMax?: number;
@@ -13,8 +14,6 @@ export interface VendorQueryDto {
   sortOrder?: 'asc' | 'desc';
 }
 
-// TODO: FATAL - NOT WORKING
-
 @Injectable()
 export class VendorService {
   constructor(private prisma: PrismaService) {}
@@ -22,6 +21,7 @@ export class VendorService {
   async findAll(query: VendorQueryDto = {}) {
     const {
       categoryId,
+      category, // slug
       location,
       priceMin,
       priceMax,
@@ -37,7 +37,15 @@ export class VendorService {
       isActive: true,
     };
 
-    if (categoryId) {
+    // category slug로 필터링 (categoryId보다 우선)
+    if (category) {
+      const categoryRecord = await this.prisma.vendorCategory.findUnique({
+        where: { slug: category },
+      });
+      if (categoryRecord) {
+        where.categoryId = categoryRecord.id;
+      }
+    } else if (categoryId) {
       where.categoryId = categoryId;
     }
 
@@ -65,14 +73,16 @@ export class VendorService {
     const skip = (page - 1) * limit;
 
     // 데이터 조회
+    // 동일 값 정렬 시 페이지네이션 중복 방지를 위해 id를 보조 정렬 키로 사용
     const [allVendors, total] = await Promise.all([
       this.prisma.vendor.findMany({
         where,
         skip,
         take: limit,
-        orderBy: {
-          [sortBy]: sortOrder,
-        },
+        orderBy: [
+          { [sortBy]: sortOrder },
+          { id: 'asc' },
+        ],
         include: {
           category: {
             select: {

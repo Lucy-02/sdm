@@ -2,10 +2,16 @@
 
 import { ArrowBigRightDash, Camera, Sparkles, Palette } from 'lucide-react';
 import { motion } from 'motion/react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import ImageCarousel from '@/components/ui/ImageCarousel';
 import { apiClient } from '@/lib/api-client';
+import studioImage1 from '@/assets/studio/Group14.png';
+import studioImage2 from '@/assets/studio/Group 15.png';
+import dressImage1 from '@/assets/dress/image 27.png';
+import dressImage2 from '@/assets/dress/image 28.png';
+import makeupImage1 from '@/assets/makeup/image 29.png';
 
 interface VendorImage {
   url: string;
@@ -236,9 +242,7 @@ export default function Home() {
       </div>
 
       <div className="w-[1160px] h-[300px] flex flex-col gap-2">
-        <div className="text-xl font-semibold text-neutral-800 pl-1">
-          다른 사람들의 스드메
-        </div>
+        <div className="text-xl font-semibold text-neutral-800 pl-1">다른 사람들의 스드메</div>
         <ImageCarousel
           itemCount={8}
           itemWidth={280}
@@ -251,102 +255,95 @@ export default function Home() {
           {[
             {
               id: 1,
+              image: studioImage1,
+              type: 'studio' as const,
               studio: '로맨틱 스튜디오',
-              dress: '클래식 화이트',
-              makeup: '내추럴 메이크업',
               budget: '350만원',
-              gradient: 'from-neutral-300 to-neutral-400',
             },
             {
               id: 2,
-              studio: '모던 포토',
-              dress: '빈티지 레이스',
-              makeup: '글램 메이크업',
+              image: dressImage1,
+              type: 'dress' as const,
+              dress: '클래식 화이트',
               budget: '420만원',
-              gradient: 'from-neutral-300 to-neutral-400',
             },
             {
               id: 3,
-              studio: '아뜰리에 스튜디오',
-              dress: '미니멀 실크',
+              image: makeupImage1,
+              type: 'makeup' as const,
               makeup: '코랄 메이크업',
               budget: '380만원',
-              gradient: 'from-neutral-300 to-neutral-400',
             },
             {
               id: 4,
+              image: studioImage2,
+              type: 'studio' as const,
               studio: '프리미엄 스튜디오',
-              dress: '프린세스 드레스',
-              makeup: '로맨틱 메이크업',
               budget: '520만원',
-              gradient: 'from-neutral-300 to-neutral-400',
             },
             {
               id: 5,
-              studio: '감성 스튜디오',
+              image: dressImage2,
+              type: 'dress' as const,
               dress: '보헤미안 드레스',
-              makeup: '베이지 메이크업',
               budget: '330만원',
-              gradient: 'from-neutral-300 to-neutral-400',
-            },
-            {
-              id: 6,
-              studio: '클래식 스튜디오',
-              dress: '머메이드 드레스',
-              makeup: '시크 메이크업',
-              budget: '450만원',
-              gradient: 'from-neutral-300 to-neutral-400',
-            },
-            {
-              id: 7,
-              studio: '럭셔리 포토',
-              dress: '골드 라인 드레스',
-              makeup: '골드 메이크업',
-              budget: '580만원',
-              gradient: 'from-neutral-300 to-neutral-400',
             },
             {
               id: 8,
-              studio: '내추럴 스튜디오',
-              dress: '심플 드레스',
+              image: makeupImage1,
+              type: 'makeup' as const,
               makeup: '데일리 메이크업',
               budget: '290만원',
-              gradient: 'from-neutral-300 to-neutral-400',
+            },
+            {
+              id: 6,
+              image: makeupImage1,
+              type: 'makeup' as const,
+              makeup: '시크 메이크업',
+              budget: '450만원',
+            },
+            {
+              id: 7,
+              image: makeupImage1,
+              type: 'studio' as const,
+              studio: '럭셔리 포토',
+              budget: '580만원',
             },
           ].map(result => (
             <div
               key={result.id}
-              className="flex-shrink-0 rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer hover:scale-[102%]"
+              className="flex-shrink-0 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer hover:scale-[102%] relative"
               style={{ width: '280px', height: '220px' }}
             >
-              <div className={`w-full h-full bg-gradient-to-br ${result.gradient} p-4 flex flex-col justify-between relative`}>
-                <div className="absolute top-2 right-2 bg-white/90 rounded-lg px-3 py-1 text-xs font-semibold text-neutral-700 shadow-sm">
+              <Image src={result.image} alt="스드메 이미지" fill className="object-cover" />
+              <div className="absolute inset-0 flex flex-col justify-between p-4">
+                <div className="absolute top-2 right-2 bg-white/90 rounded-lg px-3 py-1 text-xs font-semibold text-neutral-700 shadow-sm z-10">
                   {result.budget}
                 </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-4xl font-bold text-white/30 group-hover:text-white/40 transition-colors">
-                    #{result.id}
-                  </div>
-                </div>
-                <div className="bg-white/95 rounded-lg p-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Camera size={14} className="text-[#8E808A]" />
-                    <span className="text-xs font-semibold text-neutral-700">
-                      {result.studio}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles size={14} className="text-[#B36B6B]" />
-                    <span className="text-xs font-semibold text-neutral-700">
-                      {result.dress}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Palette size={14} className="text-[#AF9A9D]" />
-                    <span className="text-xs font-semibold text-neutral-700">
-                      {result.makeup}
-                    </span>
-                  </div>
+                <div className="flex-1" />
+                <div className="bg-white/95 rounded py-2 px-3 backdrop-blur-sm relative z-10">
+                  {result.type === 'studio' && result.studio && (
+                    <div className="flex items-center gap-2">
+                      <Camera size={14} className="text-[#8E808A]" />
+                      <span className="text-xs font-semibold text-neutral-700">
+                        {result.studio}
+                      </span>
+                    </div>
+                  )}
+                  {result.type === 'dress' && result.dress && (
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-[#B36B6B]" />
+                      <span className="text-xs font-semibold text-neutral-700">{result.dress}</span>
+                    </div>
+                  )}
+                  {result.type === 'makeup' && result.makeup && (
+                    <div className="flex items-center gap-2">
+                      <Palette size={14} className="text-[#AF9A9D]" />
+                      <span className="text-xs font-semibold text-neutral-700">
+                        {result.makeup}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

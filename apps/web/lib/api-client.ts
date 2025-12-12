@@ -39,3 +39,65 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// SWR fetcher
+export const fetcher = <T>(url: string): Promise<T> =>
+  apiClient.get(url).then(res => res.data);
+
+// Vendor 관련 타입
+export interface VendorImage {
+  url: string;
+  alt?: string;
+  isPrimary?: boolean;
+}
+
+export interface VendorTag {
+  name: string;
+  slug: string;
+}
+
+export interface VendorCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  description?: string;
+  location: string;
+  priceMin: number;
+  priceMax: number;
+  rating: number;
+  reviewCount: number;
+  viewCount: number;
+  images: VendorImage[];
+  tags: VendorTag[];
+  category: VendorCategory;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VendorListResponse {
+  data: Vendor[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface VendorQueryParams {
+  category?: string; // slug로 카테고리 필터링
+  location?: string;
+  priceMin?: number;
+  priceMax?: number;
+  tags?: string[];
+  page?: number;
+  limit?: number;
+  sortBy?: 'rating' | 'reviewCount' | 'priceMin' | 'createdAt';
+  sortOrder?: 'asc' | 'desc';
+}

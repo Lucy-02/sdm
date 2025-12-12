@@ -185,9 +185,9 @@
 
 ## 📊 진행 상황
 - [x] 기술 스택 추천 완료
-- [x] 초기 계획 문서 작성 (001_initial_plan.md)
-- [x] 설정 Todo 문서 작성 (002_setup_todo.md)
-- [x] DB 스키마 설계 완료 (003_database_schema.md)
+- [x] 초기 계획 문서 작성 (develop_001_initial_plan.md)
+- [x] 설정 Todo 문서 작성 (develop_002_setup_todo.md)
+- [x] DB 스키마 설계 완료 (develop_003_database_schema.md)
 - [x] Monorepo 구조 생성
 - [x] Prisma 스키마 작성
 - [x] Docker Compose 설정
@@ -202,19 +202,19 @@
 - [x] Vendor API 구현 및 데이터 연동 ⭐ NEW
 
 ## 🔗 관련 문서
-- [001_initial_plan.md](../docs/plan/001_initial_plan.md)
-- [002_setup_todo.md](../docs/todo/002_setup_todo.md)
-- [003_database_schema.md](../docs/structure/003_database_schema.md)
-- [004_initial_setup_review.md](../docs/review/004_initial_setup_review.md)
-- [005_nestjs_basics.md](../docs/DKB/005_nestjs_basics.md)
-- [006_prisma_basics.md](../docs/DKB/006_prisma_basics.md)
-- [007_mongodb_migration_plan.md](../docs/plan/007_mongodb_migration_plan.md)
-- [008_postgresql_vs_mongodb.md](../docs/DKB/008_postgresql_vs_mongodb.md)
-- [009_auth_library_research.md](../docs/DKB/009_auth_library_research.md)
-- [010_auth_system_plan.md](../docs/plan/010_auth_system_plan.md)
-- [011_better_auth_guide.md](../docs/DKB/011_better_auth_guide.md)
-- [012_phase3_implementation_plan.md](../docs/plan/012_phase3_implementation_plan.md)
-- [014_vendor_register_plan.md](../docs/plan/014_vendor_register_plan.md) ⭐ NEW
+- [develop_001_initial_plan.md](../docs/plan/develop_001_initial_plan.md)
+- [develop_002_setup_todo.md](../docs/todo/develop_002_setup_todo.md)
+- [develop_003_database_schema.md](../docs/structure/develop_003_database_schema.md)
+- [develop_004_initial_setup_review.md](../docs/review/develop_004_initial_setup_review.md)
+- [develop_005_nestjs_basics.md](../docs/DKB/develop_005_nestjs_basics.md)
+- [develop_006_prisma_basics.md](../docs/DKB/develop_006_prisma_basics.md)
+- [develop_007_mongodb_migration_plan.md](../docs/plan/develop_007_mongodb_migration_plan.md)
+- [develop_008_postgresql_vs_mongodb.md](../docs/DKB/develop_008_postgresql_vs_mongodb.md)
+- [develop_009_auth_library_research.md](../docs/DKB/develop_009_auth_library_research.md)
+- [develop_010_auth_system_plan.md](../docs/plan/develop_010_auth_system_plan.md)
+- [develop_011_better_auth_guide.md](../docs/DKB/develop_011_better_auth_guide.md)
+- [develop_012_phase3_implementation_plan.md](../docs/plan/develop_012_phase3_implementation_plan.md)
+- [develop_014_vendor_register_plan.md](../docs/plan/develop_014_vendor_register_plan.md)
 
 ## 📝 메모
 - Frontend: Next.js 15 + TypeScript + Tailwind
@@ -292,7 +292,7 @@ apps/api/prisma/migrations/20251205015830_init/  ✅ NEW (DB 마이그레이션)
 ```
 
 ## ⏰ 마지막 업데이트
-2025-12-09 (Vendor Register 페이지 구현 완료 - 초대 링크 기반 업체 회원가입)
+2025-12-12 (브랜치 기반 Global Numbering 적용, .claude 구조 문서 작성)
 
 ## 📝 최근 변경 사항 (Vendor Register 구현)
 ### 새로 생성된 파일

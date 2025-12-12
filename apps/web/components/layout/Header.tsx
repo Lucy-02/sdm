@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Search,
   Heart,
   User,
   Menu,
@@ -20,6 +19,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useSession, signOut } from '@/lib/auth-client';
+import SearchDropdown from './SearchDropdown';
 
 const categories = [
   { name: '스튜디오', slug: 'studio', icon: Camera, color: 'text-[#8E808A]' },
@@ -32,17 +32,9 @@ const categories = [
 export default function Header() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/vendors?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -63,18 +55,7 @@ export default function Header() {
           </Link>
 
           {/* Search Bar - Desktop */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="업체명으로 검색"
-                className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#C58D8D] focus:border-transparent transition-all"
-              />
-            </div>
-          </form>
+          <SearchDropdown className="hidden md:flex flex-1 max-w-md mx-8" />
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center gap-1">
@@ -204,18 +185,9 @@ export default function Header() {
         </div>
 
         {/* Mobile Search */}
-        <form onSubmit={handleSearch} className="md:hidden pb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="업체명으로 검색"
-              className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#C58D8D] focus:border-transparent"
-            />
-          </div>
-        </form>
+        <div className="md:hidden pb-3">
+          <SearchDropdown isMobile />
+        </div>
       </div>
 
       {/* Mobile Menu */}
