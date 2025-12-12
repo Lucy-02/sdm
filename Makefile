@@ -1,13 +1,16 @@
 # 기본 타겟: make만 실행하면 help 표시
 .DEFAULT_GOAL := help
 
-.PHONY: help mcp-add mcp-add-context7 mcp-add-sequential mcp-add-serena mcp-remove mcp-list mcp-reset mcp-check
+.PHONY: help dev-up mcp-add mcp-add-context7 mcp-add-sequential mcp-add-serena mcp-remove mcp-list mcp-reset mcp-check
 
 # 도움말
 help:
-	@echo "🚀 Claude Code MCP Management"
+	@echo "🚀 SDM Development Commands"
 	@echo ""
-	@echo "Available commands:"
+	@echo "Development:"
+	@echo "  make dev-up                - 프론트(web) + 백(api) 동시 실행"
+	@echo ""
+	@echo "MCP Management:"
 	@echo "  make mcp-add               - 모든 MCP 서버 추가"
 	@echo "  make mcp-add-context7      - Context7만 추가"
 	@echo "  make mcp-add-sequential    - Sequential Thinking만 추가"
@@ -21,9 +24,16 @@ help:
 	@echo "  make mcp-reset             - 프로젝트 승인 초기화"
 	@echo ""
 	@echo "📖 Quick Start:"
-	@echo "  1. make mcp-add     # MCP 서버 추가"
-	@echo "  2. make mcp-check   # .mcp.json 확인"
-	@echo "  3. make mcp-list    # 서버 목록 확인"
+	@echo "  1. make dev-up      # 개발 서버 실행"
+	@echo "  2. make mcp-add     # MCP 서버 추가"
+
+# 프론트(web) + 백(api) 동시 개발 서버 실행
+dev-up:
+	@echo "🚀 Starting development servers..."
+	@echo "   - Web (Next.js): http://localhost:3000"
+	@echo "   - API (NestJS):  http://localhost:3001"
+	@echo ""
+	@npx pnpm --parallel --filter web --filter api dev
 
 # 모든 MCP 서버 추가
 mcp-add: mcp-add-context7 mcp-add-sequential mcp-add-serena
