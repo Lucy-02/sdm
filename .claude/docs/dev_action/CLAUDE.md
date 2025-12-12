@@ -6,19 +6,25 @@ Claude가 직접 수행할 수 없는 작업을 개발자에게 요청하는 문
 
 ## 📝 문서 작성 규칙
 
-### 파일명 형식
+### 파일명 형식 (브랜치 기반)
 ```
-[global_number]_[action_type]_action.md
-예: 010_database_setup_action.md
-예: 011_api_key_configuration_action.md
+{branch}_{number}_{action_type}_action.md
+예: master_010_database_setup_action.md
+예: feature-deploy_001_api_key_configuration_action.md
 ```
 
-### 📌 번호 할당 필수 확인
-**새 dev_action 문서 생성 전 반드시:**
+### 📌 브랜치 기반 번호 할당
+**스크립트 사용 (권장):**
+```bash
+./.claude/scripts/claude-new-doc.sh dev_action "action_name"
+# 자동: 브랜치 감지 → 번호 할당 → index.md 업데이트
+```
+
+**수동 생성 시:**
 1. `.claude/context/index.md` 열기
-2. "다음 번호" 확인
-3. 해당 번호로 문서 생성
-4. index.md에 즉시 기록
+2. 현재 브랜치 섹션에서 "다음 번호" 확인
+3. `{branch}_{number}_{name}_action.md` 형식으로 생성
+4. index.md 브랜치 섹션에 즉시 기록
 
 ### Action 유형
 - **Setup**: 환경 설정
@@ -209,3 +215,16 @@ Claude가 직접 수행할 수 없는 작업을 개발자에게 요청하는 문
 - 개발자 관점에서 설명
 - 복사-붙여넣기 가능한 코드
 - 실패 가능성 대비
+
+## 🕐 Time MCP 필수 사용
+
+**⚠️ Dev Action 문서의 모든 timestamp는 `mcp__time__get_current_time` 도구로 조회하세요.**
+
+### 적용 위치
+- 요청일시
+- 타임라인 (요청, 할당, 시작, 완료)
+- 커뮤니케이션 기록 시간
+
+### ❌ 금지
+- 시간 추측 금지
+- 이전 시간 재사용 금지

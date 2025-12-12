@@ -1,7 +1,7 @@
 # 기본 타겟: make만 실행하면 help 표시
 .DEFAULT_GOAL := help
 
-.PHONY: help dev-up mcp-add mcp-add-context7 mcp-add-sequential mcp-add-serena mcp-remove mcp-list mcp-reset mcp-check
+.PHONY: help mcp-add mcp-add-context7 mcp-add-sequential mcp-add-serena mcp-add-time mcp-remove mcp-list mcp-reset mcp-check
 
 # 도움말
 help:
@@ -15,12 +15,14 @@ help:
 	@echo "  make mcp-add-context7      - Context7만 추가"
 	@echo "  make mcp-add-sequential    - Sequential Thinking만 추가"
 	@echo "  make mcp-add-serena        - Serena만 추가"
+	@echo "  make mcp-add-time          - Time만 추가"
 	@echo "  make mcp-list              - MCP 서버 목록 확인"
 	@echo "  make mcp-check             - .mcp.json 파일 확인"
 	@echo "  make mcp-remove            - 모든 MCP 서버 제거"
 	@echo "  make mcp-remove-context7   - Context7만 제거"
 	@echo "  make mcp-remove-sequential - Sequential Thinking만 제거"
 	@echo "  make mcp-remove-serena     - Serena만 제거"
+	@echo "  make mcp-remove-time       - Time만 제거"
 	@echo "  make mcp-reset             - 프로젝트 승인 초기화"
 	@echo ""
 	@echo "📖 Quick Start:"
@@ -36,7 +38,7 @@ dev-up:
 	@npx pnpm --parallel --filter web --filter api dev
 
 # 모든 MCP 서버 추가
-mcp-add: mcp-add-context7 mcp-add-sequential mcp-add-serena
+mcp-add: mcp-add-context7 mcp-add-sequential mcp-add-serena mcp-add-time
 	@echo ""
 	@echo "✅ All MCP servers have been added!"
 	@echo "Run 'make mcp-list' to verify"
@@ -59,6 +61,12 @@ mcp-add-serena:
 	@claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server --context ide-assistant --project $(PWD)
 	@echo "✓ Serena added"
 
+# Time 추가 (uvx)
+mcp-add-time:
+	@echo "📦 Adding Time MCP server..."
+	@claude mcp add time -- uvx mcp-server-time
+	@echo "✓ Time added"
+
 # MCP 서버 목록 확인
 mcp-list:
 	@echo "📋 Current MCP servers:"
@@ -80,8 +88,13 @@ mcp-remove-serena:
 	@claude mcp remove serena
 	@echo "✓ Serena removed"
 
+mcp-remove-time:
+	@echo "🗑️  Removing Time..."
+	@claude mcp remove time
+	@echo "✓ Time removed"
+
 # 모든 MCP 서버 제거
-mcp-remove: mcp-remove-context7 mcp-remove-sequential mcp-remove-serena
+mcp-remove: mcp-remove-context7 mcp-remove-sequential mcp-remove-serena mcp-remove-time
 	@echo ""
 	@echo "✅ All MCP servers have been removed!"
 

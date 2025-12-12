@@ -6,18 +6,25 @@
 
 ## 📝 문서 작성 규칙
 
-### 파일명 형식
+### 파일명 형식 (브랜치 기반)
 ```
-[global_number]_[descriptive_name]_todo.md
-예: 002_authentication_system_todo.md
+{branch}_{number}_{name}_todo.md
+예: master_002_authentication_system_todo.md
+예: feature-auth_001_jwt_implementation_todo.md
 ```
 
-### 📌 번호 할당 필수 확인
-**새 todo 문서 생성 전 반드시:**
+### 📌 브랜치 기반 번호 할당
+**스크립트 사용 (권장):**
+```bash
+./.claude/scripts/claude-new-doc.sh todo "task_name"
+# 자동: 브랜치 감지 → 번호 할당 → index.md 업데이트
+```
+
+**수동 생성 시:**
 1. `.claude/context/index.md` 열기
-2. "다음 번호" 확인
-3. 해당 번호로 문서 생성
-4. index.md에 즉시 기록
+2. 현재 브랜치 섹션에서 "다음 번호" 확인
+3. `{branch}_{number}_{name}_todo.md` 형식으로 생성
+4. index.md 브랜치 섹션에 즉시 기록
 
 ### 필수 구성 요소
 1. **관련 계획 문서 참조**
@@ -140,3 +147,16 @@
 - 병렬 실행 가능한 작업 표시
 - 의존성 명확히 표현
 - 진행 상태 실시간 업데이트
+
+## 🕐 Time MCP 필수 사용
+
+**⚠️ Todo 문서의 모든 timestamp는 `mcp__time__get_current_time` 도구로 조회하세요.**
+
+### 적용 위치
+- 작업 완료 시간: `[x] 작업명 - 2025-11-28 14:35`
+- 작업 시작 시간: `시작: 2025-11-28 14:00`
+- 차단 발생 시간
+
+### ❌ 금지
+- 시간 추측 금지
+- 이전 시간 재사용 금지
